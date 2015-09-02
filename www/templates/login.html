@@ -1,0 +1,26 @@
+<ion-modal-view>
+  <ion-header-bar>
+    <h1 class="title">Join Us</h1>
+    <div class="buttons">
+      <button class="button button-clear" ng-click="closeLogin()">Close</button>
+    </div>
+  </ion-header-bar>
+  <ion-content padding="true" class="has-header">
+    <form>
+      <ion-list>
+        <label class="item item-input">
+          <span class="input-label">Mail</span>
+          <input type="text" placeholder="">
+        </label>
+        <label class="item item-input">
+          <span class="input-label">Password</span>
+          <input type="password" placeholder="">
+        </label>
+      </ion-list>
+      <div class="spacer" style="height: 40px;"></div>
+      <a href="#/tripList" class="button button-stable button-block ">Log in</a>
+      <a href="#/signup" class="button button-positive button-clear button-block ">Or create an account</a>
+    </form>
+    <button class="button button-positive button-block  icon-left ion-social-facebook">Log in with Facebook</button>
+  </ion-content>
+</ion-view>

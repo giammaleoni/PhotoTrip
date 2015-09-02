@@ -1,0 +1,62 @@
+<ion-view title="titolo">
+
+  <ion-content padding="true" class="has-header">
+        <form>
+            <label class="item item-input">
+                <span class="input-label">Trip Title</span>
+                <input type="text" ng-model="trip.title">
+            </label>
+            <div class="spacer" style="width: 300px; height: 26px;"></div>
+            <label class="item item-input">
+                <i class="icon ion-search placeholder-icon"></i>
+                <input type="search" placeholder="Where">
+            </label>
+            <div class="spacer" style="width: 300px; height: 26px;"></div>
+            <label class="item item-input">
+                <span class="input-label">From</span>
+                <input type="date" placeholder="" ng-model="trip.from">
+            </label>
+            <label class="item item-input">
+                <span class="input-label">To</span>
+                <input type="date" placeholder="" ng-model="trip.from">
+            </label>
+        </form>
+        <div class="list card">
+            <div class="item item-stable item-button-right">
+				Trip Mates
+				<a class="button button-positive button-clear" href="#/tripList/tripDetail/mates">Edit</a>
+			</div>
+            <div class="item item-body">
+                <ion-list>
+                    <ion-item class="item-avatar-left">
+                        <img src="http://www.lebaccanti.it/scripts/image.php?src=http://www.lebaccanti.it/wp-content/agency/Claudia%20Cassano/file/Claudia-Cassano-5.jpg&amp;w=205&amp;h=205&amp;zc=1&amp;a=t">
+                        <h2>Claudia C.</h2>
+                        <p></p>
+                    </ion-item>
+                </ion-list>
+            </div>
+        </div>
+    </ion-content>
+
+    <div class="tabs-striped tabs-bottom tabs-background-stable tabs-color-positive">
+      <div class="tabs tabs-icon-top">
+        <a class="tab-item active" href="#/tripList/tripDetail">
+          <i class="icon ion-home"></i>
+          Home
+        </a>
+        <a class="tab-item" href="#/album">
+          <i class="icon ion-images"></i>
+          Album
+        </a>
+        <a class="tab-item" href="#/map">
+          <i class="icon ion-location"></i>
+          Map
+        </a>
+      <a class="tab-item" href="#/camera">
+          <i class="icon ion-camera"></i>
+          Photo
+        </a>
+      </div>
+    </div>
+
+</ion-view>
