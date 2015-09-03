@@ -77,6 +77,16 @@ angular.module('starter', ['ionic', 'starter.controllers'])
         //}
       }
     }
+  })
+
+  .state('app.friends', {
+    url: '/trips/:tripId/friends',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/friends.html',
+        controller: 'FriendsCtrl',
+      }
+    }
   });
 
   // if none of the above states are matched, use this as the fallback

@@ -1,4 +1,4 @@
-<ion-view title="titolo">
+<ion-view title="{{trip.title}}">
 
   <ion-content padding="true" class="has-header">
         <form>
@@ -9,29 +9,30 @@
             <div class="spacer" style="width: 300px; height: 26px;"></div>
             <label class="item item-input">
                 <i class="icon ion-search placeholder-icon"></i>
-                <input type="search" placeholder="Where">
+                <input type="search" placeholder="Where" ng-model="trip.where">
             </label>
             <div class="spacer" style="width: 300px; height: 26px;"></div>
             <label class="item item-input">
                 <span class="input-label">From</span>
-                <input type="date" placeholder="" ng-model="trip.from">
+                <input type="date" placeholder="">
             </label>
             <label class="item item-input">
                 <span class="input-label">To</span>
-                <input type="date" placeholder="" ng-model="trip.from">
+                <input type="date" placeholder="">
             </label>
         </form>
         <div class="list card">
             <div class="item item-stable item-button-right">
 				Trip Mates
-				<a class="button button-positive button-clear" href="#/tripList/tripDetail/mates">Edit</a>
+				<a class="button button-positive button-clear" ng-href="#/app/trips/{{trip.id}}/friends">Edit</a>
 			</div>
             <div class="item item-body">
-                <ion-list>
-                    <ion-item class="item-avatar-left">
-                        <img src="http://www.lebaccanti.it/scripts/image.php?src=http://www.lebaccanti.it/wp-content/agency/Claudia%20Cassano/file/Claudia-Cassano-5.jpg&amp;w=205&amp;h=205&amp;zc=1&amp;a=t">
-                        <h2>Claudia C.</h2>
-                        <p></p>
+                <ion-list >
+                    <ion-item ng-repeat="friend in tripFriends | filter:{checked:true}" 
+                              class="item-avatar-left" >
+                        <img ng-src="{{friend.img}}">
+                        <h2>{{friend.name}} {{friend.surname}}</h2>
+                        <p>{{friend.other}}</p>
                     </ion-item>
                 </ion-list>
             </div>

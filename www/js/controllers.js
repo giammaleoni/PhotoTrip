@@ -2,10 +2,41 @@ angular.module('starter.controllers', [])
 
 .service('TripsService', function($q) {
   return {
-    trips: [
-      { title: 'Capodanno Amsterdam', id: 1, from: '31/12/2014', to: '03/01/2015', img: 'http://www.offerteshopping.it/wp-content/uploads/2015/04/amsterdam-lastminute.jpg' },
-      { title: 'Test', id: 2, from: '10/08/2014', to: '11/08/2014', img: 'http://www.offerteshopping.it/wp-content/uploads/2015/04/amsterdam-lastminute.jpg' },
+    trips: [{
+        title: 'Capodanno Amsterdam',
+        id: 1,
+        where: 'Amsterdam, Paesi Bassi',
+        from: '31/12/2014', to: '03/01/2015',
+        img: 'http://www.offerteshopping.it/wp-content/uploads/2015/04/amsterdam-lastminute.jpg',
+        friends: [
+          {id:1},
+          {id:2},
+        ],
+      },
+      {
+        title: 'Test',
+        id: 2,
+        from: '10/08/2014',
+        where: 'Posizione Test, Italia',
+        to: '11/08/2014',
+        img: 'http://www.offerteshopping.it/wp-content/uploads/2015/04/amsterdam-lastminute.jpg',
+        friends:
+          [
+            {id:1},
+            {id:2},
+            {id:3},
+          ],
+      },
     ],
+
+    friends: [
+      { id: 1, name: 'Claudia', surname: 'Cassano', installed: 'Y', other: "blablabla", img: '/img/anonimo.png'},
+      { id: 2, name: 'Gianmaria', surname: 'Leoni', installed: 'Y', other: "blablabla", img: '/img/anonimo.png'},
+      { id: 3, name: 'Alberto', surname: 'Leoni', installed: 'N', other: "blablabla", img: '/img/anonimo.png'},
+      { id: 4, name: 'Pinco', surname: 'Pallino', installed: 'Y', other: "blablabla", img: '/img/anonimo.png'},
+    ],
+
+
     getTrips: function() {
       return this.trips
     },
@@ -17,11 +48,54 @@ angular.module('starter.controllers', [])
           __trip = trip //dfd.resolve(trip)
         }
       })
-      console.log(__trip);
       return __trip;
       //return dfd.promise
-    }
-
+    },
+    getFriends: function() {
+      return this.friends
+    },
+    getFriendsChecked: function(tripId) {
+      //da sistemare!!
+      friends = this.friends;
+      tripFriends = this.trips[tripId].friends;
+      tripFriends.forEach(function(friend){
+        for (var i = 0; i < friends.length; i++) {
+          if (friend.id === friends[i].id) {
+            friends[i].checked = true;
+          }
+        }
+      })
+      return friends;
+    },
+    getTripFriends: function(tripId) {
+      var __trip;
+      this.trips.forEach(function(trip) {
+        if (trip.id === parseInt(tripId)) {
+          __trip = trip
+        }
+      })
+      return __trip.friends;
+    },
+    getFriendDetail: function(friend) {
+      friends = this.friends;
+      for (var i = 0; i < friends.length; i++) {
+        if (friends[i].id === friend.id ) {
+          return friends[i];
+        }
+      }
+    },
+    getFriendsDetail: function(tripFriends) {
+      friends = this.friends;
+      tripFriends.forEach(function(friend, index, tf){
+        for (var i = 0; i < friends.length; i++) {
+          if (friends[i].id === friend.id ) {
+            //friend = friends[i];
+            tf[index] = friends[i];
+          }
+        }
+      })
+      return tripFriends;
+    },
   }
 })
 
@@ -75,4 +149,15 @@ angular.module('starter.controllers', [])
   //$scope.trip = trip;
 
   $scope.trip = TripsService.getTrip($stateParams.tripId);
+
+  //da comprimere in un solo statement direttamente nel service
+  //$scope.tripFriends = TripsService.getTripFriends($stateParams.tripId);
+  //$scope.tripFriends = TripsService.getFriendsDetail($scope.tripFriends);
+
+  $scope.tripFriends = TripsService.getFriendsChecked($stateParams.tripId);
+
+})
+
+.controller('FriendsCtrl', function($scope, $stateParams, TripsService){
+  $scope.friends = TripsService.getFriendsChecked($stateParams.tripId);
 });
