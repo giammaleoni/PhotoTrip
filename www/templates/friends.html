@@ -8,7 +8,7 @@
     </div>
 
     <ion-list>
-      <ion-checkbox ng-repeat="friend in friends | filter:search"
+      <ion-checkbox ng-repeat="friend in trip.friends | filter:search"
                     ng-model="friend.checked"
                     ng-checked="friend.checked"
                     class="item-avatar-left item-checkbox-right item-button-right">

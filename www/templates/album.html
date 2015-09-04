@@ -1,0 +1,46 @@
+<ion-view title="{{trip.title}}">
+
+  <ion-content padding="true" class="has-header">
+
+
+    <div class="list card" ng-repeat="photo in album">
+      <div class="item">
+        <p>{{photo.name}}</p>
+      </div>
+      <div class="item item-image">
+        <img ng-src="{{photo.img}}">
+      </div>
+      <div class="item item-avatar">
+        <img ng-src="{{photo.by.img}}">
+        <h2>Pic by {{photo.by.name}} {{photo.by.surname}}</h2>
+        <p>{{photo.date}}</p>
+        <p>{{photo.descr}}</p>
+      </div>
+
+
+
+    </div>
+  </ion-content>
+
+  <div class="tabs-striped tabs-bottom tabs-background-stable tabs-color-positive">
+    <div class="tabs tabs-icon-top">
+      <a class="tab-item" ng-href="#/app/trips/{{trip.id}}">
+        <i class="icon ion-home"></i>
+        Home
+      </a>
+      <a class="tab-item active" ng-href="#/app/trips/{{trip.id}}/album">
+        <i class="icon ion-images"></i>
+        Album
+      </a>
+      <a class="tab-item" ng-href="#/app/trips/{{trip.id}}/map">
+        <i class="icon ion-location"></i>
+        Map
+      </a>
+    <a class="tab-item" ng-href="#/app/trips/{{trip.id}}/camera">
+        <i class="icon ion-camera"></i>
+        Photo
+      </a>
+    </div>
+  </div>
+
+</ion-view>

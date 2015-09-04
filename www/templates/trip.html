@@ -28,7 +28,7 @@
 			</div>
             <div class="item item-body">
                 <ion-list >
-                    <ion-item ng-repeat="friend in tripFriends | filter:{checked:true}" 
+                    <ion-item ng-repeat="friend in trip.friends | filter:{checked:true}"
                               class="item-avatar-left" >
                         <img ng-src="{{friend.img}}">
                         <h2>{{friend.name}} {{friend.surname}}</h2>
@@ -41,19 +41,19 @@
 
     <div class="tabs-striped tabs-bottom tabs-background-stable tabs-color-positive">
       <div class="tabs tabs-icon-top">
-        <a class="tab-item active" href="#/tripList/tripDetail">
+        <a class="tab-item active" ng-href="#/app/trips/{{trip.id}}">
           <i class="icon ion-home"></i>
           Home
         </a>
-        <a class="tab-item" href="#/album">
+        <a class="tab-item" ng-href="#/app/trips/{{trip.id}}/album">
           <i class="icon ion-images"></i>
           Album
         </a>
-        <a class="tab-item" href="#/map">
+        <a class="tab-item" ng-href="#/app/trips/{{trip.id}}/map">
           <i class="icon ion-location"></i>
           Map
         </a>
-      <a class="tab-item" href="#/camera">
+      <a class="tab-item" ng-href="#/app/trips/{{trip.id}}/camera">
           <i class="icon ion-camera"></i>
           Photo
         </a>

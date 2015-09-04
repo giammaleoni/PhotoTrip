@@ -1,4 +1,6 @@
-angular.module('starter.controllers', [])
+angular
+
+.module('starter.controllers', [])
 
 .service('TripsService', function($q) {
   return {
@@ -12,6 +14,25 @@ angular.module('starter.controllers', [])
           {id:0},
           {id:1},
         ],
+        album: [
+          {
+            id:0, name: 'tramonto',
+            descr:'tramonto sui canali',
+            by: {id: 1},
+            date:'01/01/2015',
+            img: '/img/amsterdam1.jpg',
+            geotag: { lat: '52.3747158', lon: '4.8986142,12' },
+          },
+          {
+            id:1,
+            name: 'test',
+            descr:'descrizione test',
+            by: {id: 1},
+            date:'02/01/2015',
+            img: '/img/amsterdam2.jpg',
+            geotag: { lat: '52.3748158', lon: '4.8986142,12' },
+          },
+        ],
       },
       {
         title: 'Vacanze Romane',
@@ -21,18 +42,47 @@ angular.module('starter.controllers', [])
         img: '/img/roma.jpg',
         friends:
           [
+            {id:0},
             {id:1},
             {id:2},
-            {id:3},
+          ],
+          album: [
+            {
+              id:0,
+              name: 'tramonto',
+              descr:'tramonto sul tevere',
+              by: {id: 0},
+              date:'10/08/2014',
+              img: '/img/roma1.jpg',
+              geotag: { lat: '41.9100711', lon: '12.5359979,11' },
+            },
+            {
+              id:1,
+              name: 'test',
+              descr:'descrizione test',
+              by: {id: 3},
+              date:'11/08/2014',
+              img: '/img/roma2.jpg',
+              geotag: { lat: '41.9101711', lon: '12.5359979,11' },
+            },
+            {
+              id:3,
+              name: 'test',
+              descr:'descrizione test',
+              by: {id: 3},
+              date:'11/08/2014',
+              img: '/img/roma3.jpg',
+              geotag: { lat: '41.9102711', lon: '12.5359979,11' },
+            },
           ],
       },
     ],
 
     friends: [
-      { id: 0, name: 'Claudia', surname: 'Cassano', installed: 'Y', other: "blablabla", img: '/img/anonimo.png', checked: false},
-      { id: 1, name: 'Gianmaria', surname: 'Leoni', installed: 'Y', other: "blablabla", img: '/img/anonimo.png', checked: false},
-      { id: 2, name: 'Alberto', surname: 'Leoni', installed: 'N', other: "blablabla", img: '/img/anonimo.png', checked: false},
-      { id: 3, name: 'Pinco', surname: 'Pallino', installed: 'Y', other: "blablabla", img: '/img/anonimo.png', checked: false},
+      { id: 0, name: 'Claudia',   surname: 'Cassano', installed: 'Y', other: "blablabla", img: '/img/anonimo.png'},
+      { id: 1, name: 'Gianmaria', surname: 'Leoni',   installed: 'Y', other: "blablabla", img: '/img/anonimo.png'},
+      { id: 2, name: 'Alberto',   surname: 'Leoni',   installed: 'N', other: "blablabla", img: '/img/anonimo.png'},
+      { id: 3, name: 'Pinco',     surname: 'Pallino', installed: 'Y', other: "blablabla", img: '/img/anonimo.png'},
     ],
 
 
@@ -52,19 +102,6 @@ angular.module('starter.controllers', [])
     },
     getFriends: function() {
       return this.friends
-    },
-    getFriendsChecked: function(trip) {
-      //da sistemare!!
-      friends = this.friends;
-      tripFriends = trip.friends;
-      tripFriends.forEach(function(friend){
-        for (var i = 0; i < friends.length; i++) {
-          if (friend.id === friends[i].id) {
-            friends[i].checked = true;
-          }
-        }
-      })
-      return friends;
     },
     getTripFriends: function(tripId) {
       var __trip;
@@ -95,7 +132,45 @@ angular.module('starter.controllers', [])
       })
       return tripFriends;
     },
+    getTripFriendsDetail: function(trip, friends){
+      tripFriends = trip.friends
+      trip.friends = [];
+      friends.forEach(function(friend){
+        trip.friends.push(angular.copy(friend));
+        for (var i = 0; i < tripFriends.length; i++) {
+          if (tripFriends[i].id === friend.id) {
+            trip.friends[i].checked = true;
+            break;
+          }else{
+            //trip.friends[i].checked = false;
+          }
+        }
+      });
+      trip.inited = true;
+      return trip
+    },
+    getPhotoDetail: function(album, friends){
+      album.forEach
+
+      album.inited = true;
+      return trip
+    },
+    localSaveTrip: function (trip){
+      //salva un trip nella local storage
+    },
+    localGetTrips: function(){
+      //riprende tutti i trip dalla local storage
+    },
+    localGetFriends: function(){
+      //riprende tutti gli amici dalla local storage
+    }
+
   }
+})
+
+.factory('InitService', function() {
+	var hasInited = false;
+	return hasInited;
 })
 
 .controller('AppCtrl', function($scope, $ionicModal, $timeout) {
@@ -141,24 +216,100 @@ angular.module('starter.controllers', [])
 
 .controller('TripsCtrl', function($scope, trips) {
   $scope.trips = trips;
+
 })
 
 .controller('TripCtrl', function($scope, $stateParams, TripsService){
-  //.controller('TripCtrl', function($scope, trip) {
-  //$scope.trip = trip;
-
-
-
-  //da comprimere in un solo statement direttamente nel service
-  //$scope.tripFriends = TripsService.getTripFriends($stateParams.tripId);
-  //$scope.tripFriends = TripsService.getFriendsDetail($scope.tripFriends);
 
   $scope.trip = TripsService.getTrip($stateParams.tripId);
-  $scope.tripFriends = TripsService.getFriendsChecked($scope.trip);
+  $scope.friends = TripsService.getFriends();
+
+  //se il trip è già stato inizializzato non re-inizializzare
+  if(! $scope.trip.inited ) TripsService.getTripFriendsDetail($scope.trip, $scope.friends);
 
 })
 
 .controller('FriendsCtrl', function($scope, $stateParams, TripsService){
-  $scope.trip = TripsService.getTrip($stateParams.tripId)
-  $scope.friends = TripsService.getFriendsChecked($scope.trip);
+
+  $scope.trip = TripsService.getTrip($stateParams.tripId);
+  $scope.friends = TripsService.getFriends();
+
+  //se il trip è già stato inizializzato non re-inizializzare
+  if(! $scope.trip.inited ) TripsService.getTripFriendsDetail($scope.trip, $scope.friends);
+
+})
+
+.controller('AlbumCtrl', function($scope, $stateParams, TripsService){
+
+  $scope.trip = TripsService.getTrip($stateParams.tripId);
+  $scope.album = angular.copy($scope.trip.album);
+
+  for (var i = 0; i < $scope.album.length; i++) {
+    $scope.album[i].by = TripsService.getFriendDetail($scope.album[i].by);
+  }
+
+
+})
+
+.controller('MapCtrl', function($scope, $ionicLoading, $compile, $stateParams, TripsService) {
+  $scope.trip = TripsService.getTrip($stateParams.tripId);
+
+
+  function initialize() {
+    var myLatlng = new google.maps.LatLng(43.07493,-89.381388);
+
+    var mapOptions = {
+      center: myLatlng,
+      zoom: 16,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    var map = new google.maps.Map(document.getElementById("map"),
+        mapOptions);
+
+    //Marker + infowindow + angularjs compiled ng-click
+    var contentString = "<div><a ng-click='clickTest()'>Click me!</a></div>";
+    var compiled = $compile(contentString)($scope);
+
+    var infowindow = new google.maps.InfoWindow({
+      content: compiled[0]
+    });
+
+    var marker = new google.maps.Marker({
+      position: myLatlng,
+      map: map,
+      title: 'Uluru (Ayers Rock)'
+    });
+
+    google.maps.event.addListener(marker, 'click', function() {
+      infowindow.open(map,marker);
+    });
+
+    $scope.map = map;
+  }
+
+  initialize();
+
+  //google.maps.event.addDomListener(window, 'load', initialize);
+
+  $scope.centerOnMe = function() {
+    if(!$scope.map) {
+      return;
+    }
+
+    $scope.loading = $ionicLoading.show({
+      content: 'Getting current location...',
+      showBackdrop: false
+    });
+
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      $scope.map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+      $scope.loading.hide();
+    }, function(error) {
+      alert('Unable to get location: ' + error.message);
+    });
+  };
+
+  $scope.clickTest = function() {
+    alert('Example of infowindow with ng-click')
+  };
 });

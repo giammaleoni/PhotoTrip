@@ -87,7 +87,27 @@ angular.module('starter', ['ionic', 'starter.controllers'])
         controller: 'FriendsCtrl',
       }
     }
-  });
+  })
+
+  .state('app.album', {
+    url: '/trips/:tripId/album',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/album.html',
+        controller: 'AlbumCtrl',
+      }
+    }
+  })
+
+  .state('app.map', {
+    url: '/trips/:tripId/map',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/map.html',
+        controller: 'MapCtrl',
+      }
+    }
+  })
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/trips');
