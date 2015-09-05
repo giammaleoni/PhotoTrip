@@ -16,21 +16,22 @@ angular
         ],
         album: [
           {
-            id:0, name: 'tramonto',
+            id:0,
+            title: 'tramonto',
             descr:'tramonto sui canali',
             by: {id: 1},
             date:'01/01/2015',
             img: '/img/amsterdam1.jpg',
-            geotag: { lat: '52.3747158', lon: '4.8986142,12' },
+            geotag: { lat: 52.3717158, lng: 4.8916142 },
           },
           {
             id:1,
-            name: 'test',
+            title: 'test',
             descr:'descrizione test',
             by: {id: 1},
             date:'02/01/2015',
             img: '/img/amsterdam2.jpg',
-            geotag: { lat: '52.3748158', lon: '4.8986142,12' },
+            geotag: { lat: 52.3749158, lng: 4.8986142 },
           },
         ],
       },
@@ -49,30 +50,30 @@ angular
           album: [
             {
               id:0,
-              name: 'tramonto',
+              title: 'tramonto',
               descr:'tramonto sul tevere',
               by: {id: 0},
               date:'10/08/2014',
               img: '/img/roma1.jpg',
-              geotag: { lat: '41.9100711', lon: '12.5359979,11' },
+              geotag: { lat: 41.9100711, lng: 12.5369979 },
             },
             {
               id:1,
-              name: 'test',
+              title: 'test',
               descr:'descrizione test',
               by: {id: 3},
               date:'11/08/2014',
               img: '/img/roma2.jpg',
-              geotag: { lat: '41.9101711', lon: '12.5359979,11' },
+              geotag: { lat: 41.9127711, lng: 12.5351979 },
             },
             {
               id:3,
-              name: 'test',
+              title: 'test',
               descr:'descrizione test',
               by: {id: 3},
               date:'11/08/2014',
               img: '/img/roma3.jpg',
-              geotag: { lat: '41.9102711', lon: '12.5359979,11' },
+              geotag: { lat: 41.9119711, lng: 12.5325979 },
             },
           ],
       },
@@ -256,33 +257,43 @@ angular
 
 
   function initialize() {
-    var myLatlng = new google.maps.LatLng(43.07493,-89.381388);
+    var myLatlng = new google.maps.LatLng(0,0);
 
     var mapOptions = {
       center: myLatlng,
-      zoom: 16,
+      zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
-    var map = new google.maps.Map(document.getElementById("map"),
-        mapOptions);
+    var map = new google.maps.Map(document.getElementById('map'),mapOptions);
+
 
     //Marker + infowindow + angularjs compiled ng-click
-    var contentString = "<div><a ng-click='clickTest()'>Click me!</a></div>";
-    var compiled = $compile(contentString)($scope);
+    var infowindow = new google.maps.InfoWindow();
+    var contentString;
+    var compiled;
 
-    var infowindow = new google.maps.InfoWindow({
-      content: compiled[0]
-    });
 
-    var marker = new google.maps.Marker({
-      position: myLatlng,
-      map: map,
-      title: 'Uluru (Ayers Rock)'
-    });
 
-    google.maps.event.addListener(marker, 'click', function() {
-      infowindow.open(map,marker);
-    });
+    map.panTo($scope.trip.album[0].geotag);
+    $scope.trip.album.forEach(function(photo, index){
+
+        marker = new google.maps.Marker({
+          position: photo.geotag,
+          map: map,
+          title: photo.title,
+       });
+
+       google.maps.event.addListener(marker, 'click', function() {
+         contentString =  "<div><a ng-click='clickTest()'>Click me!</a>" +
+                          "<p><img ng-src='{{trip.album[" + index + "].img'></p>" + 
+                          "<p>{{trip.album[" + index + "].title}}</p></div>"
+         compiled = $compile(contentString)($scope);
+         infowindow.setContent(compiled[0]);
+         infowindow.open(map,marker);
+       });
+
+    })
+
 
     $scope.map = map;
   }
