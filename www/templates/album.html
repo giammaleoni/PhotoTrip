@@ -1,11 +1,18 @@
+
 <ion-view title="{{trip.title}}">
 
   <ion-content padding="true" class="has-header">
-
+    <!-- per dettagli vedere il controller della lista degli amici -->
+    <!-- idea: doRefresh() deve essere una funzione del service che capisce cosa scricare -->
+    <ion-refresher
+      pulling-text="Pull to refresh..."
+      on-refresh="doRefresh()">
+    </ion-refresher>
 
     <div class="list card" ng-repeat="photo in album">
-      <div class="item">
-        <p>{{photo.title}}</p>
+      <div class="item item-button-right photo-title">
+        <button class="button button-icon icon ion-edit"></button>
+        {{photo.title}}
       </div>
       <div class="item item-image">
         <img ng-src="{{photo.img}}">
@@ -13,12 +20,37 @@
       <div class="item item-avatar">
         <img ng-src="{{photo.by.img}}">
         <h2>Pic by {{photo.by.name}} {{photo.by.surname}}</h2>
-        <p>{{photo.date}}</p>
+        <p>{{photo.date | date: "dd/MM/yyyy"}}</p>
         <p>{{photo.descr}}</p>
+        <!-- <button ng-repeat='tag in photo.tags' class="button button-small icon-left ion-pricetag padding-horizontal">{{tag}}</button> -->
+        <ul class="plunker-taglist">
+          <li ng-repeat="tag in photo.tags">
+            <a ng-href="#">{{tag}}</a>
+          </li>
+        </ul>
       </div>
-
-
-
+      <div class="item tabs tabs-secondary tabs-icon-left">
+        <!-- <a class="tab-item" href="#">
+          <i class="icon ion-thumbsup"></i>
+          Like
+        </a>
+        <a class="tab-item" href="#">
+          <i class="icon ion-chatbox"></i>
+          Comment
+        </a> -->
+        <a class="tab-item" href="#">
+          <i class="icon ion-share"></i>
+          Share on Facebook
+        </a>
+        <a class="tab-item" href="#" ng-click="shareAnywhere()">
+          <i class="icon ion-share"></i>
+          Test Share anywhere
+        </a>
+        <a class="tab-item" href="#" ng-click="shareViaTwitter('some message', null, 'http://blog.nraboy.com')">
+          <i class="icon ion-share"></i>
+          Test Share via Twitter
+        </a>
+      </div>
     </div>
   </ion-content>
 

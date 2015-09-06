@@ -1,10 +1,19 @@
 <ion-view title="{{trip.title}}">
 
+  <ion-nav-buttons side="right"> <!-- da implementare filtro del pulsante se admin ng-if="utente == filter{trip.friends.admin:true}.include?(user)"> -->
+    <label class="toggle toggle-positive">
+      <input type="checkbox" ng-model='editable'>
+      <div class="track">
+        <div class="handle"></div>
+      </div>
+    </label>
+  </ion-nav-buttons>
+
   <ion-content padding="true" class="has-header">
         <form>
             <label class="item item-input">
                 <span class="input-label">Trip Title</span>
-                <input type="text" ng-model="trip.title">
+                <input type="text" ng-model="trip.title" ng-disabled="editable">
             </label>
             <div class="spacer" style="width: 300px; height: 26px;"></div>
             <label class="item item-input">
@@ -14,7 +23,8 @@
             <div class="spacer" style="width: 300px; height: 26px;"></div>
             <label class="item item-input">
                 <span class="input-label">From</span>
-                <input type="date" placeholder="">
+                <!-- <input type="date" placeholder=""> -->
+                <input type="date" id="dateChoosen" value="{{trip.from}}" ng-model="appoint.dt">
             </label>
             <label class="item item-input">
                 <span class="input-label">To</span>
@@ -31,6 +41,9 @@
                     <ion-item ng-repeat="friend in trip.friends | filter:{checked:true}"
                               class="item-avatar-left" >
                         <img ng-src="{{friend.img}}">
+                        <span class="item-note" ng-if="friend.admin">
+                          Admin
+                        </span>
                         <h2>{{friend.name}} {{friend.surname}}</h2>
                         <p>{{friend.other}}</p>
                     </ion-item>
