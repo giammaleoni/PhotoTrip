@@ -2,7 +2,7 @@
 
   <ion-nav-buttons side="right"> <!-- da implementare filtro del pulsante se admin ng-if="utente == filter{trip.friends.admin:true}.include?(user)"> -->
     <label class="toggle toggle-positive">
-      <input type="checkbox" ng-model='editable'>
+      <input type="checkbox" ng-model='$parent.editable'>
       <div class="track">
         <div class="handle"></div>
       </div>
@@ -13,28 +13,31 @@
         <form>
             <label class="item item-input">
                 <span class="input-label">Trip Title</span>
-                <input type="text" ng-model="trip.title" ng-disabled="editable">
+                <input type="text" ng-model="trip.title" ng-disabled="!editable">
             </label>
             <div class="spacer" style="width: 300px; height: 26px;"></div>
             <label class="item item-input">
-                <i class="icon ion-search placeholder-icon"></i>
-                <input type="search" placeholder="Where" ng-model="trip.where">
+                <!-- <i class="icon ion-search placeholder-icon"></i>
+                <input type="search" placeholder="Where" ng-model="trip.where" ng-disabled="editable"> -->
+                <span class="input-label">Where</span>
+                <input type="search" ng-model="trip.where" ng-disabled="!editable">
             </label>
             <div class="spacer" style="width: 300px; height: 26px;"></div>
             <label class="item item-input">
                 <span class="input-label">From</span>
-                <!-- <input type="date" placeholder=""> -->
-                <input type="date" id="dateChoosen" value="{{trip.from}}" ng-model="appoint.dt">
+                <input type="date" placeholder="" ng-disabled="!editable">
             </label>
             <label class="item item-input">
                 <span class="input-label">To</span>
-                <input type="date" placeholder="">
+                <input type="date" placeholder="" ng-disabled="!editable">
             </label>
+
+
         </form>
         <div class="list card">
             <div class="item item-stable item-button-right">
 				Trip Mates
-				<a class="button button-positive button-clear" ng-href="#/app/trips/{{trip.id}}/friends">Edit</a>
+				<a class="button button-positive button-clear" ng-href="#/app/trips/{{trip.id}}/friends" ng-disabled="!editable">Edit</a>
 			</div>
             <div class="item item-body">
                 <ion-list >

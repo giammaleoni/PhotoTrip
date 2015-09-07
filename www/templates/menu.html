@@ -22,9 +22,14 @@
     </ion-header-bar>
     <ion-content>
       <ion-list>
-        <ion-item menu-close ng-click="login()">
-          Login
+        <ion-item class="item item-avatar item-button-right">
+          <img src={{}}>
+          <h3>{{user}}</h3>
+          <button class="button icon-left button-outline button-small button-positive" ng-click="azione()">{{tipoAzione}}</button>
         </ion-item>
+        <!-- <ion-item menu-close ng-click="login()">
+          Login
+        </ion-item> -->
         <!-- <ion-item menu-close href="#/app/search">
           Search
         </ion-item>

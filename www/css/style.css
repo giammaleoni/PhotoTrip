@@ -1,6 +1,4 @@
 /* Empty. Add your own CSS if you like */
-
-
 /*Tutte le classi custom sono da chiamare per ultime*/
 
 /* Elimina i bordi */
@@ -17,6 +15,8 @@
   /*font-size: 20px;*/
 }
 
+
+/* CSS per i tag */
 ul.plunker-taglist a {
   margin-left: 14px;
   padding: 0 6px 0 8px;
@@ -72,4 +72,12 @@ ul.plunker-taglist a:after {
   -moz-box-shadow: -1px -1px 2px #004977;
   -webkit-box-shadow: -1px -1px 2px #004977;
   box-shadow: -1px -1px 2px #004977;
+}
+
+/*fine CCS per i tag */
+
+/* disabled */
+input:disabled {
+    color: Grey;
+    background-color: transparent;
 }
