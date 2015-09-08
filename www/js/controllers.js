@@ -458,8 +458,9 @@ angular
   }
 
   $scope.changeView = function(){
-    $state.go("/app/trips/"+ $stateParams.tripId + "/albumChessboard");
-    //$state.go("app.albumChessboard");
+    //$state.go("/app/trips/"+ $stateParams.tripId + "/albumChessboard");
+    $state.go("app.trips/:tripId/albumChessboard", {tripId:$stateParams.tripId});
+    //$state.go("^.albumChessboard");
   }
 
 
@@ -468,8 +469,14 @@ angular
 .controller('AlbumChessboardCtrl', function($scope, $state, $stateParams, TripsService){
   $scope.trip = TripsService.getTrip($stateParams.tripId);
   $scope.photos = angular.copy($scope.trip.album);
-  for (var i = 0; i < $scope.album.length; i++) {
-    $scope.album[i].by = TripsService.getFriendDetail($scope.album[i].by);
+  for (var i = 0; i < $scope.photos.length; i++) {
+    $scope.photos[i].by = TripsService.getFriendDetail($scope.photos[i].by);
+  }
+
+  $scope.changeView = function(){
+    //$state.go("/app/trips/"+ $stateParams.tripId + "/albumChessboard");
+    $state.go("app.trips/:tripId/album", {tripId:$stateParams.tripId});
+    //$state.go("^.albumChessboard");
   }
 
 })

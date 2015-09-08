@@ -1,5 +1,10 @@
 <ion-view title="{{trip.title}}">
 
+  <!-- da sistemare -->
+  <ion-nav-buttons ng-if="$parent.trip.from" side="right">
+    <button class="button button-icon icon ion-images" ng-click="changeView()"></button>
+  </ion-nav-buttons>
+
   <ion-content>
     <!-- <div class="row no-padding" ng-repeat="photo in photos" ng-if="$index % 4 === 0">
         <div class="col col-25 no-padding padding-top-5" ng-if="$index < photos.length">
@@ -32,5 +37,29 @@
           <div class="chess-board" style="background-image:url({{photo.img}});"></div>
         </a>
       </div>
+
   </ion-content>
+
+  <!-- da sistemare, soluzione bruttissima -->
+  <div ng-if="trip.from" class="tabs-striped tabs-bottom tabs-background-stable tabs-color-positive">
+    <div class="tabs tabs-icon-top">
+      <a class="tab-item" ng-href="#/app/trips/{{trip.id}}">
+        <i class="icon ion-home"></i>
+        Home
+      </a>
+      <a class="tab-item active" ng-href="#/app/trips/{{trip.id}}/album">
+        <i class="icon ion-images"></i>
+        Album
+      </a>
+      <a class="tab-item" ng-href="#/app/trips/{{trip.id}}/map">
+        <i class="icon ion-location"></i>
+        Map
+      </a>
+    <a class="tab-item" ng-href="#/app/trips/{{trip.id}}/camera">
+        <i class="icon ion-camera"></i>
+        Photo
+      </a>
+    </div>
+  </div>
+
 </ion-view>

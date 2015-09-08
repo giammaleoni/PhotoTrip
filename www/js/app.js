@@ -57,7 +57,7 @@ angular.module('starter', ['ionic', 'starter.controllers'])
       }
     })
 
-  .state('app.trip', {
+  .state('app.trips/:tripId', {
     url: '/trips/:tripId',
     views: {
       'menuContent': {
@@ -72,7 +72,7 @@ angular.module('starter', ['ionic', 'starter.controllers'])
     }
   })
 
-  .state('app.friends', {
+  .state('app.trips/:tripId/friends', {
     url: '/trips/:tripId/friends',
     views: {
       'menuContent': {
@@ -82,7 +82,7 @@ angular.module('starter', ['ionic', 'starter.controllers'])
     }
   })
 
-  .state('app.album', {
+  .state('app.trips/:tripId/album', {
     url: '/trips/:tripId/album',
     views: {
       'menuContent': {
@@ -92,7 +92,7 @@ angular.module('starter', ['ionic', 'starter.controllers'])
     }
   })
 
-  .state('app.albumChessboard', {
+  .state('app.trips/:tripId/albumChessboard', {
     url: '/trips/:tripId/albumChessboard',
     views: {
       'menuContent': {
@@ -102,7 +102,7 @@ angular.module('starter', ['ionic', 'starter.controllers'])
     }
   })
 
-  .state('app.map', {
+  .state('app.map/:tripId', {
     url: '/trips/:tripId/map',
     views: {
       'menuContent': {
@@ -112,7 +112,7 @@ angular.module('starter', ['ionic', 'starter.controllers'])
     }
   })
 
-  .state('app.camera', {
+  .state('app.trips/:tripId/camera', {
     url: '/trips/:tripId/camera',
     views: {
       'menuContent': {
