@@ -22,7 +22,7 @@
     <ion-list>
       <ion-item ng-repeat="trip in trips | filter:search" class="item-thumbnail-left" ng-href="#/app/trips/{{trip.id}}">
         {{trip.title}}
-        <img ng-src="{{trip.img}}">
+        <img ng-src="{{trip.img}}" class="fit-thumbnail">
         <p>{{trip.where}}</p>
         <p>{{trip.from | date: "dd/MM/yyyy"}} - {{trip.to | date: "dd/MM/yyyy"}}</p>
         <ion-option-button class="button-positive" ng-click="share(item)">

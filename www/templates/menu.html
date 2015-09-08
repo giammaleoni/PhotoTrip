@@ -22,22 +22,16 @@
     </ion-header-bar>
     <ion-content>
       <ion-list>
-        <ion-item class="item item-avatar item-button-right">
-          <img src={{}}>
+        <a class="item item-avatar item-button-right" ng-href="#/app/trips">
+          <img ng-src="{{icon}}">
           <h3>{{user}}</h3>
-          <button class="button icon-left button-outline button-small button-positive" ng-click="azione()">{{tipoAzione}}</button>
-        </ion-item>
-        <!-- <ion-item menu-close ng-click="login()">
-          Login
-        </ion-item> -->
-        <!-- <ion-item menu-close href="#/app/search">
-          Search
-        </ion-item>
-        <ion-item menu-close href="#/app/browse">
-          Browse
-        </ion-item> -->
-        <ion-item menu-close href="#/app/trips">
+          <button class="button button-outline button-small button-positive" ng-click="azione()">{{tipoAzione}}</button>
+        </a>
+        <ion-item menu-close ng-href="#/app/trips">
           Trips
+        </ion-item>
+        <ion-item menu-close ng-href="#/app/photos">
+          All photos
         </ion-item>
       </ion-list>
     </ion-content>

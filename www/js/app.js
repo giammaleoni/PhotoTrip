@@ -32,23 +32,16 @@ angular.module('starter', ['ionic', 'starter.controllers'])
     controller: 'AppCtrl'
   })
 
-  .state('app.search', {
-    url: '/search',
+  .state('app.photos', {
+    url: '/photos',
     views: {
       'menuContent': {
-        templateUrl: 'templates/search.html'
+        templateUrl: 'templates/photos.html',
+        controller: 'PhotosCtrl',
       }
     }
   })
 
-  .state('app.browse', {
-      url: '/browse',
-      views: {
-        'menuContent': {
-          templateUrl: 'templates/browse.html'
-        }
-      }
-    })
     .state('app.trips', {
       url: '/trips',
       views: {
@@ -99,12 +92,32 @@ angular.module('starter', ['ionic', 'starter.controllers'])
     }
   })
 
+  .state('app.albumChessboard', {
+    url: '/trips/:tripId/albumChessboard',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/photos.html',
+        controller: 'AlbumChessboardCtrl',
+      }
+    }
+  })
+
   .state('app.map', {
     url: '/trips/:tripId/map',
     views: {
       'menuContent': {
         templateUrl: 'templates/map.html',
         controller: 'MapCtrl',
+      }
+    }
+  })
+
+  .state('app.camera', {
+    url: '/trips/:tripId/camera',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/camera.html',
+        controller: 'CameraCtrl',
       }
     }
   })

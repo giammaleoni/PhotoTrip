@@ -1,6 +1,10 @@
 
 <ion-view title="{{trip.title}}">
 
+  <ion-nav-buttons side="right">
+    <button class="button button-icon icon ion-images" ng-click="changeView()"></button>
+  </ion-nav-buttons>
+
   <ion-content padding="true" class="has-header">
     <!-- per dettagli vedere il controller della lista degli amici -->
     <!-- idea: doRefresh() deve essere una funzione del service che capisce cosa scricare -->

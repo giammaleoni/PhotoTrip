@@ -10,8 +10,15 @@
   padding: 0px;
 }
 
+.padding-top-5{
+  padding-top: 5px;
+}
+
+/* thumnail kip aspect ratio*/
+.fit-thumbnail { object-fit: cover; }
+
 .photo-title{
-  font-family: zapfino, savoye LET, cursive;
+  font-family: 'zapfino', 'savoye LET', 'cursive', 'Helvetica Neue', 'Roboto', 'Segoe UI', 'sans-serif';
   /*font-size: 20px;*/
 }
 
@@ -80,4 +87,16 @@ ul.plunker-taglist a:after {
 input:disabled {
     color: Grey;
     background-color: transparent;
+}
+
+/* scacchiera per immagini */
+/*    min-height adesso è fissa trovare il modo per fare le immagini quadrate */
+.chess-board{
+  /*background-image: url(/img/amsterdam1.jpg);*/
+  background-repeat:no-repeat;
+  background-size:cover;
+  background-position:center;
+  width:100%;
+  height:0;
+  padding-top:100%
 }

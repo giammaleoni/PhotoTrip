@@ -1,0 +1,9 @@
+<ion-view title="{{trip.title}}">
+  <ion-content id='cameraPage' scroll='false'>
+    <webcam on-stream="onStream(stream)"
+            on-streaming="onSuccess()"
+            on-error="onError(err)"
+            channel="myChannel">
+    </webcam>
+  </ion-content>
+</ion-view>

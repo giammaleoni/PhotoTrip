@@ -1,0 +1,36 @@
+<ion-view title="{{trip.title}}">
+
+  <ion-content>
+    <!-- <div class="row no-padding" ng-repeat="photo in photos" ng-if="$index % 4 === 0">
+        <div class="col col-25 no-padding padding-top-5" ng-if="$index < photos.length">
+            <a ng-href="#/app"><div class="chess-board" ng-style="{'background-image':'url({{photos[$index].img}})'}"></div></a>
+        </div>
+        <div class="col col-25 no-padding padding-top-5" ng-if="$index + 1 < photos.length">
+            <a ng-href="#/app"><div class="chess-board" ng-style="{'background-image':'url({{photos[$index + 1].img}})'}"></div></a>
+        </div>
+        <div class="col col-25 no-padding padding-top-5" ng-if="$index + 2 < photos.length">
+            <a ng-href="#/app"><div class="chess-board" ng-style="{'background-image':'url({{photos[$index + 2].img}})'}"></div></a>
+        </div>
+        <div class="col col-25 no-padding padding-top-5" ng-if="$index + 3 < photos.length">
+            <a ng-href="#/app"><div class="chess-board" ng-style="{'background-image':'url({{photos[$index + 3].img}})'}"></div></a>
+        </div>
+    </div>
+    <img collection-repeat="photo in photos"
+      item-width="25%"
+      item-height="100px"
+      ng-src="{{photo.img}}"> -->
+
+      <!-- per dettagli vedere il controller della lista degli amici -->
+      <!-- idea: doRefresh() deve essere una funzione del service che capisce cosa scricare -->
+      <ion-refresher
+        pulling-text="Pull to refresh..."
+        on-refresh="doRefresh()">
+      </ion-refresher>
+
+      <div collection-repeat="photo in photos" class="col col-25 no-padding">
+        <a ng-href="#/app">
+          <div class="chess-board" style="background-image:url({{photo.img}});"></div>
+        </a>
+      </div>
+  </ion-content>
+</ion-view>

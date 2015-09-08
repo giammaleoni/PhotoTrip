@@ -1,6 +1,6 @@
 angular
 
-.module('starter.controllers', ['ngCordova'])
+.module('starter.controllers', ['ngCordova', 'webcam'])
 
 .service('TripsService', function($q) {
   return {
@@ -85,10 +85,10 @@ angular
   ],
 
   friends: [
-    { id: 0, name: 'Claudia',   surname: 'Cassano', installed: true, other: "blablabla", img: '/img/anonimo.png'},
-    { id: 1, name: 'Gianmaria', surname: 'Leoni',   installed: true, other: "blablabla", img: '/img/anonimo.png'},
-    { id: 2, name: 'Alberto',   surname: 'Leoni',   installed: false, other: "blablabla", img: '/img/anonimo.png'},
-    { id: 3, name: 'Pinco',     surname: 'Pallino', installed: true, other: "blablabla", img: '/img/anonimo.png'},
+    { id: 0, name: 'Claudia',   surname: 'Cassano', installed: true,  other: "blablabla",   img: '/img/anonimo.png',  email: 'cc@mail.it'},
+    { id: 1, name: 'Gianmaria', surname: 'Leoni',   installed: true,  other: "blablabla",   img: '/img/gleoni.jpg',   email: 'gl@mail.it'},
+    { id: 2, name: 'Alberto',   surname: 'Leoni',   installed: false, other: "blablabla",   img: '/img/anonimo.png',  email: 'al@mail.it'},
+    { id: 3, name: 'Pinco',     surname: 'Pallino', installed: true,  other: "blablabla",   img: '/img/anonimo.png',  email: 'pp@mail.it'},
   ],
 
 
@@ -171,8 +171,16 @@ angular
   },
   localGetFriends: function(){
     //riprende tutti gli amici dalla local storage
-  }
-
+  },
+  getAllPhotos: function(trips){
+    photos = [];
+    trips.forEach(function(trip){
+      trip.album.forEach(function(photo){
+        photos.push(photo);
+      })
+    })
+    return photos;
+  },
 }
 })
 
@@ -181,20 +189,57 @@ angular
   return hasInited;
 })
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup) {
+.factory('CameraService', function($window) {
+  var hasUserMedia = function() {
+    return !!getUserMedia();
+  }
+
+  var getUserMedia = function() {
+    navigator.getUserMedia = ($window.navigator.getUserMedia ||
+                              $window.navigator.webkitGetUserMedia ||
+                              $window.navigator.mozGetUserMedia ||
+                              $window.navigator.msGetUserMedia);
+    return navigator.getUserMedia;
+  }
+
+  return {
+    hasUserMedia: hasUserMedia(),
+    getUserMedia: getUserMedia
+  }
+})
+
+.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup, TripsService) {
 
   var ref = new Firebase('https://radiant-heat-1148.firebaseio.com');
+  var noUser = {mail: 'no user logged', img: '/img/anonimo.png'};
+
   // Form data for the login modal
   $scope.loginData = {};
+  $scope.friends = TripsService.getFriends();
+  $scope.user = "";
+  $scope.userDetail = {};
+  $scope.icon = $scope.userDetail.img ? $scope.userDetail.img : noUser.img;
+
+  getUserDetail = function(friendList, user){
+    for (var i = 0; i < friendList.length; i++) {
+      if (friendList[i].email === user) {
+        return friendList[i];
+      }
+    }
+  }
 
   var authData = ref.getAuth();
   if (authData) {
     console.log("Authenticated user with uid:", authData.uid);
     $scope.user = authData.password.email;
+    $scope.userDetail = getUserDetail($scope.friends, $scope.user);
+    $scope.icon = $scope.userDetail.img ? $scope.userDetail.img : noUser.img;
     $scope.azione = "Log out";
   }else{
     console.log("No user logged");
     $scope.user = "no user logged";
+    $scope.userDetail = {};
+    $scope.icon = $scope.userDetail.img ? $scope.userDetail.img : noUser.img;
     $scope.tipoAzione = "Log in";
   }
 
@@ -239,18 +284,18 @@ angular
     $scope.modal2.show();
   };
 
-  $scope.showConfirm = function(){
+  $scope.showConfirm = function(error, oktext, canceltext, okfunction, cancelfunction){
     var confirmPopup = $ionicPopup.confirm({
-      title: 'Validation Error',
-      template: 'Please enter username and password.',
-      okText: 'Try Again',
-      cancelText: 'Cancel'
+      title: '', //'Validation Error',
+      template: error,
+      okText: oktext || 'Try Again',
+      cancelText: canceltext || 'Cancel'
     });
     confirmPopup.then(function(tryAgain) {
       if (tryAgain) {
-        $scope.dologin();
+        okfunction();
       }else {
-        $scope.closeLogin();
+        cancelfunction || $scope.closeLogin();
       }
     });
   }
@@ -268,21 +313,29 @@ angular
       }, function(error, authData) {
         if (error) {
           console.log("Login Failed!", error);
+          $scope.showConfirm(error);
         } else {
           console.log("Authenticated successfully with payload:", authData);
           $scope.user = authData.password.email;
+          $scope.userDetail = getUserDetail($scope.friends, $scope.user);
+          $scope.icon = $scope.userDetail.img ? $scope.userDetail.img : noUser.img;
           $scope.closeLogin();
         }
       });
     }
     else{
-      $scope.showConfirm();
+      $scope.showConfirm("Please enter username and password.");
     };
   }
 
   $scope.doLogout = function() {
-    ref.unauth();
-    $scope.user = "no user logged"
+    $scope.showConfirm("Are you sure to logout?", "Confirm", "Cancel", function() {
+      ref.unauth();
+      $scope.user = "no user logged";
+      $scope.userDetail = {};
+      $scope.icon = $scope.userDetail.img ? $scope.userDetail.img : noUser.img;
+    });
+
   }
 
   $scope.azione = function () {
@@ -306,13 +359,16 @@ angular
         if (error) {
           switch (error.code) {
             case "EMAIL_TAKEN":
-            console.log("The new user account cannot be created because the email is already in use.");
+              console.log("The new user account cannot be created because the email is already in use.");
+              $scope.showConfirm("The new user account cannot be created because the email is already in use.");
             break;
             case "INVALID_EMAIL":
-            console.log("The specified email is not a valid email.");
+              console.log("The specified email is not a valid email.");
+              $scope.showConfirm("The specified email is not a valid email.");
             break;
             default:
-            console.log("Error creating user:", error);
+              console.log("Error creating user:", error);
+              $scope.showConfirm("Error creating user:" + error);
           }
         } else {
           console.log("Successfully created user account with uid:", userData.uid);
@@ -380,7 +436,7 @@ angular
 
 })
 
-.controller('AlbumCtrl', function($scope, $stateParams, TripsService, $cordovaSocialSharing){
+.controller('AlbumCtrl', function($scope, $state, $stateParams, TripsService, $cordovaSocialSharing){
 
   $scope.trip = TripsService.getTrip($stateParams.tripId);
   $scope.album = angular.copy($scope.trip.album);
@@ -401,7 +457,20 @@ angular
     });
   }
 
+  $scope.changeView = function(){
+    $state.go("/app/trips/"+ $stateParams.tripId + "/albumChessboard");
+    //$state.go("app.albumChessboard");
+  }
 
+
+})
+
+.controller('AlbumChessboardCtrl', function($scope, $state, $stateParams, TripsService){
+  $scope.trip = TripsService.getTrip($stateParams.tripId);
+  $scope.photos = angular.copy($scope.trip.album);
+  for (var i = 0; i < $scope.album.length; i++) {
+    $scope.album[i].by = TripsService.getFriendDetail($scope.album[i].by);
+  }
 
 })
 
@@ -502,4 +571,30 @@ angular
   $scope.clickTest = function() {
     alert('Example of infowindow with ng-click')
   };
+})
+
+.controller('PhotosCtrl', function($scope, TripsService) {
+    $scope.trips = TripsService.getTrips();
+    $scope.trip = {};
+    $scope.trip.title = "Photos";
+    $scope.loadImages = function() {
+        $scope.photos = TripsService.getAllPhotos($scope.trips);
+    }
+
+    $scope.loadImages();
+})
+
+.controller('CameraCtrl', function($scope, CameraService) {
+
+  $scope.onError = function (err) {};
+  $scope.onStream = function (stream) {};
+  $scope.onSuccess = function () {};
+
+  $scope.myChannel = {
+    // the fields below are all optional
+    videoHeight: document.getElementById("cameraPage").offsetHeight || 800,
+    videoWidth: document.getElementById("cameraPage").offsetWidth || 600,
+    video: null // Will reference the video element on success
+  };
+
 });
