@@ -10,12 +10,39 @@
       <div class="list">
         <label class="item item-input">
           <span class="input-label">Username</span>
-          <input type="text" ng-model="loginData.username">
+          <input type="text" ng-model="loginData.email">
         </label>
         <label class="item item-input">
           <span class="input-label">Password</span>
           <input type="password" ng-model="loginData.password">
         </label>
+        <label class="item item-input">
+          <span class="input-label">Name</span>
+          <input type="text" ng-model="loginData.name">
+        </label>
+        <label class="item item-input">
+          <span class="input-label">Surname</span>
+          <input type="text" ng-model="loginData.surname">
+        </label>
+        <label class="item item-input">
+          <span class="input-label">Birthday</span>
+          <input type="date" ng-model="loginData.birthday">
+        </label>
+        <label class="item item-input item-select">
+          <div class="input-label">
+            Gender
+          </div>
+          <select ng-model="loginData.gender">
+            <option value='M'>Male</option>
+            <option value='F'>Female</option>
+          </select>
+        </label>
+        <li class="item item-checkbox">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="loginData.privacy">
+          </label>
+          Privacy
+        </li>
         <label class="item">
           <button class="button button-block button-positive" type="submit" id="btnSignUp">Registrati</button>
         </label>
