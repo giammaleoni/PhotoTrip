@@ -9,22 +9,26 @@
     <form ng-submit="doLogin()">
       <div class="list">
         <label class="item item-input">
-          <span class="input-label">Mail</span>
-          <input type="text" ng-model="loginData.username">
+          <span class="input-label">Email</span>
+          <input type="text" ng-model="loginData.email">
         </label>
         <label class="item item-input">
           <span class="input-label">Password</span>
           <input type="password" ng-model="loginData.password">
         </label>
-        <label class="item">
-          <button class="button button-block button-positive" type="submit" id="btnSignIn">Log in</button>
-        </label>
+        <!-- <label class="item no-padding"> -->
+          <button class="button button-full button-balanced" type="submit" id="btnSignIn">Log in</button>
+        <!-- </label> -->
       </div>
     </form>
-    <form ng-submit="signup()">
-      <div class="list">
-        <button class="button button-block button-clear button-positive" type="submit" id="btnSignUp">oppure registrati</button>
-      <div>
-    </form>
+    <div class="list">
+      <!-- <label class="item no-padding"> -->
+        <button class="button button-block button-clear button-positive" type="submit" id="btnSignUp" ng-click="signup()">or Signup</button>
+      <!-- </label> -->
+      <!-- <label class="item no-padding"> -->
+        <button class="button button-full button-positive icon-left ion-social-facebook" type="submit" id="btnSignUp" ng-click="signup()">Login with Facebook</button>
+      <!-- </label> -->
+    <div>
+
   </ion-content>
 </ion-modal-view>

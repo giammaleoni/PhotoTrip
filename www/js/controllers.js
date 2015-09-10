@@ -5,17 +5,16 @@ angular
 .factory('TripsService', function($firebaseArray){
 
   var rootRef = new Firebase("https://radiant-heat-1148.firebaseio.com/");
-  var userRef = new Firebase("https://radiant-heat-1148.firebaseio.com/users/");
+  //var userRef = new Firebase("https://radiant-heat-1148.firebaseio.com/users/");
+  //var users = $firebaseArray(userRef);
   var user = null;
-  var users = $firebaseArray(userRef);
 
   return {
-    setUser: function(username) {
-      user = username;
-      return $firebaseArray(rootrootRef.child("users/" + user));
+    setUser: function(utente) {
+      user = utente;
     },
-    getUserDetails: function () {
-      return $firebaseArray(rootRef.child("users/" + user));
+    getUser: function () {
+      return user;
     },
     getTrips: function () {
       return $firebaseArray(rootRef.child("trips"));
@@ -26,17 +25,11 @@ angular
     getRef: function () {
       return rootRef;
     },
-    getUser: function () {
-      return user;
-    },
-    getUsers: function () {
-      return users;
-    }
   };
 
 })
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup, TripsService) {
+.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup, $rootScope, TripsService) {
   // mi dati che servono:
   //  - Utente con dettaglio
   //      . name
@@ -45,25 +38,51 @@ angular
 
   // percorso firebase
   var ref = TripsService.getRef();
+
   //utente
-  $scope.user = TripsService.getUser();
-  if ($scope.user) {
-    $scope.userDetails = TripsService.getUserDetails();
-  }
+  $scope.user = null
   $scope.loginData = {};
-  $scope.users = TripsService.getUsers();
+
+  //comprende tutte le attività da fare quando ci si loogga
+  loggedUser = function(authData) {
+    userData = ref.child('users').child(authData.uid);
+    $scope.profilePic = authData.password.profileImageURL || "/img/anonimo.png";
+    userData.once("value", function(snap) {
+      $scope.user = snap.val();
+      TripsService.setUser($scope.user);
+      console.log("Authenticated user with uid:", authData.uid);
+      console.log($scope.user);
+      console.log(authData.uid);
+    });
+  }
+
 
   var authData = ref.getAuth();
   if (authData) {
-    console.log("Authenticated user with uid:", authData.uid);
-    console.log(authData);
-    //$scope.user = authData;
-    $scope.users.$add(authData);
-    //$scope.azione = "Log out"; --> fare con ng-if={{user}} sull'html
+    loggedUser(authData);
   }else{
     console.log("No user logged");
-    //$scope.user = "no user logged";
-    //$scope.tipoAzione = "Log in"; --> fare con ng-if={{user}} sull'html
+    $scope.profilePic = "/img/anonimo.png";
+    $scope.user = null;
+    TripsService.setUser($scope.user);
+  }
+
+  //pop up di conferma
+  $scope.showConfirm = function(error, oktext, canceltext){
+    var confirmPopup = $ionicPopup.confirm({
+      title: '', //'Validation Error',
+      template: error,
+      okText: oktext || 'Try Again',
+      cancelText: canceltext || 'Cancel'
+    });
+    confirmPopup.then(function(tryAgain) {
+      if (tryAgain) {
+
+      }else {
+        $scope.closeLogin();
+        $scope.closeSignup();
+      }
+    });
   }
 
   // Create the login modal that we will use later
@@ -86,7 +105,7 @@ angular
   // Perform the login action when the user submits the login form
   $scope.doLogin = function() {
     console.log('Doing login', $scope.loginData);
-    var email = $scope.loginData.username;
+    var email = $scope.loginData.email;
     var password = $scope.loginData.password;
     if(email && password){
       ref.authWithPassword({
@@ -97,28 +116,28 @@ angular
           console.log("Login Failed!", error);
           $scope.showConfirm(error);
         } else {
-          console.log("Authenticated user with uid:", authData.uid);
-          console.log(authData);
-          $scope.user = authData;
-          //$scope.userDetail = getUserDetail($scope.friends, $scope.user);
-          //$scope.icon = $scope.userDetail.img ? $scope.userDetail.img : noUser.img;
+          loggedUser(authData);
           $scope.closeLogin();
         }
       });
     }
     else{
-      $scope.showConfirm("Please enter username and password.");
+      $scope.showConfirm("Please enter mail and password.");
     };
   }
 
+  //logout
   $scope.doLogout = function() {
-    //$scope.showConfirm("Are you sure to logout?", "Confirm", "Cancel", function() {
       ref.unauth();
-      //$scope.user = "no user logged";
-      //$scope.userDetail = {};
-      //$scope.icon = $scope.userDetail.img ? $scope.userDetail.img : noUser.img;
-    //});
-
+      authData = ref.getAuth()
+      if (authData){
+        console.log("user:", authData.uid, "still logged");
+      }else{
+        $scope.profilePic = "/img/anonimo.png";
+        $scope.user = null;
+        TripsService.setUser($scope.user);
+        console.log("User logged out");
+      }
   }
 
   // Create the signup modal that we will use later
@@ -163,28 +182,48 @@ angular
           }
         } else {
           console.log("Successfully created user account with uid:", userData.uid);
-          //$scope.user = userData;
-          $scope.users.$add(
-            {
-              uid: userData.uid,
-              email: $scope.loginData.email,
-              name: $scope.loginData.name,
-              surname: $scope.loginData.surname,
-              birth_date: $scope.loginData.birthday,
-              reg_date: new Date(),
-              gender: $scope.loginData.gender,
-              trips: {},
-              privacy: $scope.loginData.privacy,
-              }
-            );
+
+          //to get the name of the user
+          // find a suitable name based on the meta info given by each provider
+          // function getName(authData) {
+          //   switch(authData.provider) {
+          //      case 'password':
+          //        return authData.password.email.replace(/@.*/, '');
+          //      case 'twitter':
+          //        return authData.twitter.displayName;
+          //      case 'facebook':
+          //        return authData.facebook.displayName;
+          //   }
+          // }
+
+          //inserisce tra gli users i dettagli dell'utente reistrato
+          ref.child("users").child(userData.uid).set({
+                email: $scope.loginData.email,
+                name: $scope.loginData.name || null,
+                surname: $scope.loginData.surname || null,
+                birth_date: $scope.loginData.birthday ? $scope.loginData.birthday.getTime() : null,
+                reg_date: Firebase.ServerValue.TIMESTAMP,
+                gender: $scope.loginData.gender || null,
+                trips: {},
+                privacy: $scope.loginData.privacy || false,
+          });
           $scope.closeSignup();
+          $scope.doLogin();
         }
       });
     }
     else{
-      $scope.showConfirm();
+      $scope.showConfirm("Please enter at least mail and password");
     };
   }
+
+//se non sono loggato si deve aprire il login!!
+$timeout(function() {
+  if (!$scope.user) {
+    $scope.login();
+  }
+}, 2000)
+
 
 })
 
