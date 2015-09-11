@@ -2,21 +2,31 @@ angular
 
 .module('starter.controllers', ['ionic', 'firebase', 'ngCordova', 'webcam'])
 
-.factory('TripsService', function($firebaseArray){
+.factory('TripsService', function($firebaseArray, $firebaseAuth){
 
   var rootRef = new Firebase("https://radiant-heat-1148.firebaseio.com/");
   //var userRef = new Firebase("https://radiant-heat-1148.firebaseio.com/users/");
   //var users = $firebaseArray(userRef);
   var user = null;
+  var profilePic = null;
 
   return {
     setUser: function(utente) {
       user = utente;
     },
+    setProfilePic: function(pic) {
+      profilePic = pic;
+    },
+    getAuth: function () {
+      return $firebaseAuth(rootRef.child("users"));
+    },
     getUser: function () {
       return user;
     },
-    getTrips: function () {
+    getProfilePic: function() {
+      return profilePic;
+    },
+    getTrips: function (tripId) {
       return $firebaseArray(rootRef.child("trips"));
     },
     getPhotos: function() {
@@ -40,32 +50,18 @@ angular
   var ref = TripsService.getRef();
 
   //utente
-  $scope.user = null
+  $scope.user = TripsService.getUser();
   $scope.loginData = {};
 
-  //comprende tutte le attività da fare quando ci si loogga
-  loggedUser = function(authData) {
-    userData = ref.child('users').child(authData.uid);
-    $scope.profilePic = authData.password.profileImageURL || "/img/anonimo.png";
-    userData.once("value", function(snap) {
-      $scope.user = snap.val();
-      TripsService.setUser($scope.user);
-      console.log("Authenticated user with uid:", authData.uid);
-      console.log($scope.user);
-      console.log(authData.uid);
-    });
-  }
-
-
-  var authData = ref.getAuth();
-  if (authData) {
-    loggedUser(authData);
-  }else{
-    console.log("No user logged");
-    $scope.profilePic = "/img/anonimo.png";
-    $scope.user = null;
-    TripsService.setUser($scope.user);
-  }
+  // var authData = ref.getAuth();
+  // if (authData) {
+  //   //loggedUser(authData);
+  // }else{
+  //   console.log("No user logged");
+  //   $scope.profilePic = "/img/anonimo.png";
+  //   $scope.user = null;
+  //   TripsService.setUser($scope.user);
+  // }
 
   //pop up di conferma
   $scope.showConfirm = function(error, oktext, canceltext){
@@ -116,7 +112,7 @@ angular
           console.log("Login Failed!", error);
           $scope.showConfirm(error);
         } else {
-          loggedUser(authData);
+          //loggedUser(authData);
           $scope.closeLogin();
         }
       });
@@ -126,6 +122,92 @@ angular
     };
   }
 
+  auth = TripsService.getAuth();
+  $scope.doFacebookLogin = function () {
+    //CI SONO PROBLEMI A FARE IL LOGIN SENZA POPUP, NON PARTE L'EVENTO ONAUTH()
+    //auth.$authWithOAuthRedirect("facebook").then(function(authData) {
+      // User successfully logged in
+      //non si può usare la console perchè il login avviene su unaltra pagina
+    //}).catch(function(error) {
+    //  if (error.code === "TRANSPORT_UNAVAILABLE") {
+        auth.$authWithOAuthPopup("facebook").then(function(authData) {
+          // User successfully logged in. We can log to the console
+          // since we’re using a popup here
+          $scope.closeLogin();
+        });
+      //} else {
+        // Another error occurred
+      //  console.log(error);
+      //}
+    //});
+  }
+
+  //comprende tutte le attività da fare quando ci si loogga
+  loggedUser = function(authData) {
+    console.log("Logged in as", authData.uid);
+    console.log(authData);
+    //aggiungere l'utente di facebook alla registrazione in user
+    userData = ref.child('users').child(authData.uid);
+    switch (authData.provider) {
+      case 'password':
+        $scope.profilePic = authData.password.profileImageURL || "/img/anonimo.png";
+        break;
+      case 'facebook':
+        $scope.profilePic = authData.facebook.profileImageURL || "/img/anonimo.png";
+        break;
+      default:
+
+    }
+
+    //$scope.profilePic = authData.password.profileImageURL || "/img/anonimo.png";
+    userData.once("value", function(snap) {
+      $scope.user = snap.val();
+
+      //se non esiste un utente registrato di facebook lo registro tra gli user
+      if (!$scope.user && authData.provider == 'facebook') {
+        ref.child("users").child(authData.uid).set({
+              email: null,
+              name: authData.facebook.cachedUserProfile.first_name,
+              surname: authData.facebook.cachedUserProfile.last_name,
+              birth_date: null,
+              reg_date: Firebase.ServerValue.TIMESTAMP,
+              gender: authData.facebook.cachedUserProfile.gender,
+              id: authData.facebook.id,
+              locale: authData.facebook.cachedUserProfile.locale,
+              link: authData.facebook.cachedUserProfile.link,
+              trips: {},
+              privacy: 'X',
+              provider: 'facebook',
+              age_range: authData.facebook.cachedUserProfile.age_range
+        });
+
+        //controlla quando user cambia
+        userData.once("value", function(snap) {
+          $scope.user = snap.val();
+          TripsService.setUser($scope.user);
+          console.log($scope.user);
+        });
+      }else {
+        TripsService.setUser($scope.user);
+        console.log($scope.user);
+      }
+
+
+    });
+  }
+
+  auth.$onAuth(function(authData) {
+  if (authData === null) {
+    console.log("Not logged in yet");
+    $scope.profilePic = "/img/anonimo.png";
+    $scope.user = null;
+    TripsService.setUser($scope.user);
+  } else {
+    loggedUser(authData);
+  }
+  TripsService.setProfilePic($scope.profilePic);
+});
+
   //logout
   $scope.doLogout = function() {
       ref.unauth();
@@ -133,10 +215,10 @@ angular
       if (authData){
         console.log("user:", authData.uid, "still logged");
       }else{
-        $scope.profilePic = "/img/anonimo.png";
-        $scope.user = null;
-        TripsService.setUser($scope.user);
-        console.log("User logged out");
+        // $scope.profilePic = "/img/anonimo.png";
+        // $scope.user = null;
+        // TripsService.setUser($scope.user);
+        // console.log("User logged out");
       }
   }
 
@@ -206,6 +288,7 @@ angular
                 gender: $scope.loginData.gender || null,
                 trips: {},
                 privacy: $scope.loginData.privacy || false,
+                provider: 'password',
           });
           $scope.closeSignup();
           $scope.doLogin();
@@ -218,17 +301,28 @@ angular
   }
 
 //se non sono loggato si deve aprire il login!!
-$timeout(function() {
-  if (!$scope.user) {
-    $scope.login();
-  }
-}, 2000)
+// $timeout(function() {
+//   if (!$scope.user) {
+//     $scope.login();
+//   }
+// }, 2000)
 
 
 })
 
-.controller('TripsCtrl', function($scope, trips) {
+.controller('TripsCtrl', function($scope, TripsService, $timeout) {
   //mi servono i trips per utente
+  ref = TripsService.getRef();
+  $timeout(function(){
+    $scope.user = TripsService.getUser();
+    $scope.profilePic = TripsService.getProfilePic();
+    //console.log($scope.user);
+  },2000);
+
+
+  //$scope.trips.push() =
+
+
 })
 
 .controller('TripCtrl', function($scope, trips, $stateParams, TripsService) {

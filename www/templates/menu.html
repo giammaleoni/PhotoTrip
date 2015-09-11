@@ -24,7 +24,8 @@
       <ion-list>
         <a class="item item-avatar item-button-right" ng-href="#/app/trips">
           <img ng-src="{{profilePic}}">
-          <h3>{{user.name}} {{user.surname}}</h3>
+          <h3>{{user.name}}</h3>
+          <h3>{{user.surname}}</h3>
           <p>{{user.email}}</p>
           <button class="button button-outline button-small button-positive" ng-click="doLogout()" ng-if="user">Logout</button>
           <button class="button button-outline button-small button-positive" ng-click="login()" ng-if="!user">Login</button>
@@ -40,10 +41,10 @@
         </ion-item>
         <ion-item menu-close ng-click="signup()">
           Signup
-        </ion-item>
+        </ion-item> -->
         <ion-item menu-close ng-click="doLogout()">
           Logout
-        </ion-item> -->
+        </ion-item>
       </ion-list>
     </ion-content>
   </ion-side-menu>
