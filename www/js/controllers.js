@@ -1,38 +1,6 @@
 angular
 
-.module('starter.controllers', ['ionic', 'firebase', 'ngCordova', 'webcam', 'ngFacebook'])
-
-.config( function( $facebookProvider ) {
-  $facebookProvider.setAppId('1486120525017906');
-
-  $facebookProvider.setCustomInit({
-      xfbml      : true,
-      version    : 'v2.4'
-    });
-})
-
-.run( function( $rootScope ) {
-  // Cut and paste the "Load the SDK" code from the facebook javascript sdk page.
-
-  // Load the facebook SDK asynchronously
-  (function(){
-     // If we've already installed the SDK, we're done
-     if (document.getElementById('facebook-jssdk')) {return;}
-
-     // Get the first script element, which we'll use to find the parent node
-     var firstScriptElement = document.getElementsByTagName('script')[0];
-
-     // Create a new script element and set its id
-     var facebookJS = document.createElement('script');
-     facebookJS.id = 'facebook-jssdk';
-
-     // Set the new script's source to the source of the Facebook JS SDK
-     facebookJS.src = '//connect.facebook.net/en_US/sdk.js';
-
-     // Insert the Facebook JS SDK into the DOM
-     firstScriptElement.parentNode.insertBefore(facebookJS, firstScriptElement);
-   }());
-})
+.module('starter.controllers', ['ionic', 'firebase', 'ngCordova', 'webcam'])
 
 
 .factory('TripsService', function($firebaseArray, $firebaseAuth){
@@ -41,6 +9,7 @@ angular
   //var userRef = new Firebase("https://radiant-heat-1148.firebaseio.com/users/");
   //var users = $firebaseArray(userRef);
   var user = null;
+  var uid = null;
   var profilePic = null;
 
   return {
@@ -70,6 +39,12 @@ angular
     },
     getRef: function () {
       return rootRef;
+    },
+    setUID: function (id) {
+      uid = id;
+    },
+    getUID: function() {
+      return uid;
     },
   };
 
@@ -167,7 +142,7 @@ angular
     //}).catch(function(error) {
     //  if (error.code === "TRANSPORT_UNAVAILABLE") {
         auth.$authWithOAuthPopup("facebook", {
-          remember: "sessionOnly",
+          //remember: "sessionOnly",
           scope: "email,user_friends",
         }).then(function(authData) {
           // User successfully logged in. We can log to the console
@@ -184,6 +159,7 @@ angular
   //comprende tutte le attività da fare quando ci si loogga
   loggedUser = function(authData) {
     console.log("Logged in as", authData.uid);
+    TripsService.setUID(authData.uid);
     console.log(authData);
     //aggiungere l'utente di facebook alla registrazione in user
     userData = ref.child('users').child(authData.uid);
@@ -205,19 +181,19 @@ angular
       //se non esiste un utente registrato di facebook lo registro tra gli user
       if (!$scope.user && authData.provider == 'facebook') {
         ref.child("users").child(authData.uid).set({
-              email: authData.facebook.email,
-              name: authData.facebook.cachedUserProfile.first_name,
-              surname: authData.facebook.cachedUserProfile.last_name,
-              birth_date: null,
-              reg_date: Firebase.ServerValue.TIMESTAMP,
-              gender: authData.facebook.cachedUserProfile.gender,
-              id: authData.facebook.id,
-              locale: authData.facebook.cachedUserProfile.locale,
-              link: authData.facebook.cachedUserProfile.link,
-              trips: {},
-              privacy: 'X',
-              provider: 'facebook',
-              age_range: authData.facebook.cachedUserProfile.age_range
+              email:        authData.facebook.email,
+              name:         authData.facebook.cachedUserProfile.first_name,
+              surname:      authData.facebook.cachedUserProfile.last_name,
+              birth_date:   null,
+              reg_date:     Firebase.ServerValue.TIMESTAMP,
+              gender:       authData.facebook.cachedUserProfile.gender,
+              id:           authData.facebook.id,
+              locale:       authData.facebook.cachedUserProfile.locale,
+              link:         authData.facebook.cachedUserProfile.link,
+              trips:        {},
+              //privacy:    'X',
+              provider:     'facebook',
+              age_range:    authData.facebook.cachedUserProfile.age_range
         });
 
         //controlla quando user cambia
@@ -319,15 +295,15 @@ angular
 
           //inserisce tra gli users i dettagli dell'utente reistrato
           ref.child("users").child(userData.uid).set({
-                email: $scope.loginData.email,
-                name: $scope.loginData.name || null,
-                surname: $scope.loginData.surname || null,
-                birth_date: $scope.loginData.birthday ? $scope.loginData.birthday.getTime() : null,
-                reg_date: Firebase.ServerValue.TIMESTAMP,
-                gender: $scope.loginData.gender || null,
-                trips: {},
-                privacy: $scope.loginData.privacy || false,
-                provider: 'password',
+                email:        $scope.loginData.email,
+                name:         $scope.loginData.name || null,
+                surname:      $scope.loginData.surname || null,
+                birth_date:   $scope.loginData.birthday ? $scope.loginData.birthday.getTime() : null,
+                reg_date:     Firebase.ServerValue.TIMESTAMP,
+                gender:       $scope.loginData.gender || null,
+                trips:        {},
+                privacy:      $scope.loginData.privacy || false,
+                provider:     'password',
           });
           $scope.closeSignup();
           $scope.doLogin();
@@ -351,7 +327,7 @@ angular
 
 .controller('TripsCtrl', function($scope, trips, TripsService, $timeout) {
   //mi servono i trips per utente
-  ref = TripsService.getRef();
+  //ref = TripsService.getRef();
   $timeout(function(){
     //va bene solo se l'utente è già loggato...
     $scope.user = TripsService.getUser();
@@ -370,39 +346,58 @@ angular
 
 })
 
-.controller('TripCtrl', function($scope, tripRef, $stateParams, TripsService, $facebook) {
+.controller('TripCtrl', function($scope, tripRef, $stateParams, $timeout, TripsService) {
   //  mi serve:
   //    - dettaglio del trip
   //    - dettaglio degli amici
+  $timeout(function(){
+    //va bene solo se l'utente è già loggato...
+    $scope.uid = TripsService.getUID();
+    $scope.user = TripsService.getUser();
+    $scope.profilePic = TripsService.getProfilePic();
 
-  //$scope.trip = TripsService.getTrip($stateParams.tripId);
+    if ($stateParams.tripId == 'newTrip') {
+      $scope.newTrip = true;
+      $scope.editable = true;
+
+      $scope.createTrip = function() {
+        //da finire
+        ref = TripsService.getRef();
+        newTrip = ref.child('trips').push({
+          example:     true,
+          // title:      $scope.trip.title,
+          // subtitle:   $scope.trip.subtitle,
+          // where:      $scope.trip.where,
+          // from:       $scope.trip.from,
+          // to:         $scope.trip.to,
+          admin:       $scope.uid,
+        });
+
+
+        //aggiorno la lista dei trip dell'utente
+        ref.child('users').child($scope.uid).child('trips').once("value", function(snap){
+          tripsOld = snap.val() || [];
+          tripsNew = tripsOld;
+          tripsNew.push(newTrip.key());
+          ref.child('users').child($scope.uid).child('trips').set(tripsNew);
+        });
+      }
+    }
+
+  },2000);
+
+
 
   tripRef.once("value", function(snap) {
     $scope.trip = snap.val();
     console.log($scope.trip);
   });
 
-  // $facebook.api("/me/friends").then(
-  //       function(response) {
-  //         $scope.$apply(function() {
-  //         $scope.myFriends = response.data;
-  //         console.log($scope.myFriends);
-  //       },
-  //       function(err) {
-  //         console.log(err);
-  //       });
+  // FB.api('me/friends', { fields: 'id, first_name,picture', limit: 6 },function(response){
   //
-  //     })
-
-  $facebook.api(
-    "/me",
-    function (response) {
-      if (response && !response.error) {
-        /* handle the result */
-        console.log(response);
-      }
-    }
-  );
+  //   console.log(response);
+  //
+  // });
 
   })
 
@@ -454,7 +449,7 @@ angular
         for(var j=0; j<trips.length; j++){
           //il parse int serve solo se è numerico l'ID del trip
           //creando un ID in lettere è da togliere
-          if (parseInt(items[i].$id) == trips[j]) {
+          if (items[i].$id == trips[j]) {
             arrayToReturn.push(items[i]);
             break;
           }

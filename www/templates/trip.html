@@ -1,7 +1,7 @@
 <ion-view title="{{trip.title}}">
 
   <ion-nav-buttons side="right"> <!-- da implementare filtro del pulsante se admin ng-if="utente == filter{trip.friends.admin:true}.include?(user)"> -->
-    <label class="toggle toggle-positive">
+    <label class="toggle toggle-positive" ng-hide='newTrip'>
       <input type="checkbox" ng-model='$parent.editable'>
       <div class="track">
         <div class="handle"></div>
@@ -10,7 +10,7 @@
   </ion-nav-buttons>
 
   <ion-content padding="true" class="has-header">
-        <form>
+        <form ng-submit="createTrip()">
             <label class="item item-input">
                 <span class="input-label">Trip Title</span>
                 <input type="text" ng-model="trip.title" ng-disabled="!editable">
@@ -32,30 +32,32 @@
                 <input type="date" placeholder="" ng-disabled="!editable">
             </label>
 
-
-        </form>
-        <div class="list card">
-            <div class="item item-stable item-button-right">
-				Trip Mates
-				<a class="button button-positive button-clear" ng-href="#/app/trips/{{trip.id}}/friends" ng-disabled="!editable">Edit</a>
-			</div>
-            <div class="item item-body">
-                <ion-list >
-                    <ion-item ng-repeat="friend in trip.friends | filter:{checked:true}"
-                              class="item-avatar-left" >
-                        <img ng-src="{{friend.img}}">
-                        <span class="item-note" ng-if="friend.admin">
-                          Admin
-                        </span>
-                        <h2>{{friend.name}} {{friend.surname}}</h2>
-                        <p>{{friend.other}}</p>
-                    </ion-item>
-                </ion-list>
+            <div class="list card">
+                <div class="item item-stable item-button-right">
+            Trip Mates
+            <a class="button button-positive button-clear" ng-href="#/app/trips/{{trip.id}}/friends" ng-disabled="!editable">Edit</a>
             </div>
-        </div>
+                <div class="item item-body">
+                    <ion-list >
+                        <ion-item ng-repeat="friend in trip.friends | filter:{checked:true}"
+                                  class="item-avatar-left" >
+                            <img ng-src="{{friend.img}}">
+                            <span class="item-note" ng-if="friend.admin">
+                              Admin
+                            </span>
+                            <h2>{{friend.name}} {{friend.surname}}</h2>
+                            <p>{{friend.other}}</p>
+                        </ion-item>
+                    </ion-list>
+                </div>
+            </div>
+
+            <button class="button button-block button-positive" type="submit" id="btnCreateTrip" ng-if='newTrip'>Create Trip</button>
+        </form>
+
     </ion-content>
 
-    <div class="tabs-striped tabs-bottom tabs-background-stable tabs-color-positive">
+    <div class="tabs-striped tabs-bottom tabs-background-stable tabs-color-positive" ng-if='!newTrip'>
       <div class="tabs tabs-icon-top">
         <a class="tab-item active" ng-href="#/app/trips/{{trip.id}}">
           <i class="icon ion-home"></i>

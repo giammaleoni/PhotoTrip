@@ -18,17 +18,17 @@
       on-refresh="doRefresh()">
     </ion-refresher>
 
-    <a href="#/tripList/newTrip" class="button button-positive button-clear button-block ">Add new trip</a>
+    <a href="#/app/trips/newTrip" class="button button-positive button-clear button-block ">Add new trip</a>
     <ion-list>
       <ion-item ng-repeat="trip in trips | filter:search | myTrips:user.trips" class="item-thumbnail-left" ng-href="#/app/trips/{{trip.$id}}">
         {{trip.title}}
         <img ng-src="{{trip.img}}" class="fit-thumbnail">
         <p>{{trip.where}}</p>
         <p>{{trip.from | date: "dd/MM/yyyy"}} - {{trip.to | date: "dd/MM/yyyy"}}</p>
-        <ion-option-button class="button-positive" ng-click="share(item)">
+        <ion-option-button class="button-positive" ng-click="share(trip)">
           Share
         </ion-option-button>
-        <ion-option-button class="button-assertive" ng-click="delete(item)">
+        <ion-option-button class="button-assertive" ng-click="delete(trip)">
           Delete
         </ion-option-button>
       </ion-item>
