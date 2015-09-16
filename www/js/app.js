@@ -63,11 +63,11 @@ angular.module('starter', ['ionic', 'starter.controllers'])
       'menuContent': {
         templateUrl: 'templates/trip.html',
         controller: 'TripCtrl',
-        // resolve: {
-        //   trip: function($stateParams, TripsService) {
-        //     return TripsService.getTrip($stateParams.tripId)
-        //   }
-        //}
+        resolve: {
+          tripRef: function($stateParams, TripsService) {
+            return TripsService.getTripRef($stateParams.tripId)
+          }
+        }
       }
     }
   })

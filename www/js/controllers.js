@@ -1,6 +1,39 @@
 angular
 
-.module('starter.controllers', ['ionic', 'firebase', 'ngCordova', 'webcam'])
+.module('starter.controllers', ['ionic', 'firebase', 'ngCordova', 'webcam', 'ngFacebook'])
+
+.config( function( $facebookProvider ) {
+  $facebookProvider.setAppId('1486120525017906');
+
+  $facebookProvider.setCustomInit({
+      xfbml      : true,
+      version    : 'v2.4'
+    });
+})
+
+.run( function( $rootScope ) {
+  // Cut and paste the "Load the SDK" code from the facebook javascript sdk page.
+
+  // Load the facebook SDK asynchronously
+  (function(){
+     // If we've already installed the SDK, we're done
+     if (document.getElementById('facebook-jssdk')) {return;}
+
+     // Get the first script element, which we'll use to find the parent node
+     var firstScriptElement = document.getElementsByTagName('script')[0];
+
+     // Create a new script element and set its id
+     var facebookJS = document.createElement('script');
+     facebookJS.id = 'facebook-jssdk';
+
+     // Set the new script's source to the source of the Facebook JS SDK
+     facebookJS.src = '//connect.facebook.net/en_US/sdk.js';
+
+     // Insert the Facebook JS SDK into the DOM
+     firstScriptElement.parentNode.insertBefore(facebookJS, firstScriptElement);
+   }());
+})
+
 
 .factory('TripsService', function($firebaseArray, $firebaseAuth){
 
@@ -26,8 +59,11 @@ angular
     getProfilePic: function() {
       return profilePic;
     },
-    getTrips: function (tripId) {
+    getTrips: function () {
       return $firebaseArray(rootRef.child("trips"));
+    },
+    getTripRef: function(tripId) {
+      return rootRef.child("trips").child(tripId);
     },
     getPhotos: function() {
       return $firebaseArray(rootRef.child("photos"));
@@ -130,7 +166,10 @@ angular
       //non si può usare la console perchè il login avviene su unaltra pagina
     //}).catch(function(error) {
     //  if (error.code === "TRANSPORT_UNAVAILABLE") {
-        auth.$authWithOAuthPopup("facebook").then(function(authData) {
+        auth.$authWithOAuthPopup("facebook", {
+          remember: "sessionOnly",
+          scope: "email,user_friends",
+        }).then(function(authData) {
           // User successfully logged in. We can log to the console
           // since we’re using a popup here
           $scope.closeLogin();
@@ -166,7 +205,7 @@ angular
       //se non esiste un utente registrato di facebook lo registro tra gli user
       if (!$scope.user && authData.provider == 'facebook') {
         ref.child("users").child(authData.uid).set({
-              email: null,
+              email: authData.facebook.email,
               name: authData.facebook.cachedUserProfile.first_name,
               surname: authData.facebook.cachedUserProfile.last_name,
               birth_date: null,
@@ -310,27 +349,62 @@ angular
 
 })
 
-.controller('TripsCtrl', function($scope, TripsService, $timeout) {
+.controller('TripsCtrl', function($scope, trips, TripsService, $timeout) {
   //mi servono i trips per utente
   ref = TripsService.getRef();
   $timeout(function(){
+    //va bene solo se l'utente è già loggato...
     $scope.user = TripsService.getUser();
     $scope.profilePic = TripsService.getProfilePic();
-    //console.log($scope.user);
   },2000);
 
+  // TEST WATCH DATA IN SERVICE
+  // $scope.$watch( function () { return TripsService.user; }, function ( user ) {
+  //   $scope.user = user;
+  // });
 
-  //$scope.trips.push() =
+  //$scope.trips = TripsService.getTrips();
+  $scope.trips = trips;
+  //console.log(trips);
 
 
 })
 
-.controller('TripCtrl', function($scope, trips, $stateParams, TripsService) {
+.controller('TripCtrl', function($scope, tripRef, $stateParams, TripsService, $facebook) {
   //  mi serve:
   //    - dettaglio del trip
   //    - dettaglio degli amici
 
-})
+  //$scope.trip = TripsService.getTrip($stateParams.tripId);
+
+  tripRef.once("value", function(snap) {
+    $scope.trip = snap.val();
+    console.log($scope.trip);
+  });
+
+  // $facebook.api("/me/friends").then(
+  //       function(response) {
+  //         $scope.$apply(function() {
+  //         $scope.myFriends = response.data;
+  //         console.log($scope.myFriends);
+  //       },
+  //       function(err) {
+  //         console.log(err);
+  //       });
+  //
+  //     })
+
+  $facebook.api(
+    "/me",
+    function (response) {
+      if (response && !response.error) {
+        /* handle the result */
+        console.log(response);
+      }
+    }
+  );
+
+  })
 
 .controller('FriendsCtrl', function($scope, $stateParams, TripsService, $timeout){
   // mi serve:
@@ -367,6 +441,27 @@ angular
   // dettaglio foto
 
 
-});
+})
 
-//più controller stesso service
+
+.filter('myTrips', function(){
+
+  return function(items, trips){
+
+    var arrayToReturn = [];
+    if (trips) {
+      for (var i=0; i<items.length; i++){
+        for(var j=0; j<trips.length; j++){
+          //il parse int serve solo se è numerico l'ID del trip
+          //creando un ID in lettere è da togliere
+          if (parseInt(items[i].$id) == trips[j]) {
+            arrayToReturn.push(items[i]);
+            break;
+          }
+        }
+      }
+    }
+    return arrayToReturn;
+
+  };
+});
