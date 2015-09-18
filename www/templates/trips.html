@@ -18,7 +18,9 @@
       on-refresh="doRefresh()">
     </ion-refresher>
 
-    <a href="#/app/trips/newTrip" class="button button-positive button-clear button-block ">Add new trip</a>
+    <a href="#/app/trips/newTrip" class="button button-positive button-clear button-block " ng-if='user'>Add new trip</a>
+    <a class="button button-positive button-clear button-block" ng-click='login()' ng-if='!user'>Login to start with PhotoTrip!</a>
+
     <ion-list>
       <ion-item ng-repeat="trip in trips | filter:search | myTrips:user.trips" class="item-thumbnail-left" ng-href="#/app/trips/{{trip.$id}}">
         {{trip.title}}

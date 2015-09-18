@@ -22,6 +22,10 @@
   /*font-size: 20px;*/
 }
 
+.ranges{
+  display: none !important;
+}
+
 
 /* CSS per i tag */
 ul.plunker-taglist a {

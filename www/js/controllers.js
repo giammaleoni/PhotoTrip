@@ -1,6 +1,6 @@
 angular
 
-.module('starter.controllers', ['ionic', 'firebase', 'ngCordova', 'webcam'])
+.module('starter.controllers', ['firebase', 'ngCordova', 'webcam', 'daterangepicker'])
 
 
 .factory('TripsService', function($firebaseArray, $firebaseAuth){
@@ -64,16 +64,6 @@ angular
   $scope.user = TripsService.getUser();
   $scope.loginData = {};
 
-  // var authData = ref.getAuth();
-  // if (authData) {
-  //   //loggedUser(authData);
-  // }else{
-  //   console.log("No user logged");
-  //   $scope.profilePic = "/img/anonimo.png";
-  //   $scope.user = null;
-  //   TripsService.setUser($scope.user);
-  // }
-
   //pop up di conferma
   $scope.showConfirm = function(error, oktext, canceltext){
     var confirmPopup = $ionicPopup.confirm({
@@ -123,7 +113,6 @@ angular
           console.log("Login Failed!", error);
           $scope.showConfirm(error);
         } else {
-          //loggedUser(authData);
           $scope.closeLogin();
         }
       });
@@ -217,6 +206,8 @@ angular
     $scope.profilePic = "/img/anonimo.png";
     $scope.user = null;
     TripsService.setUser($scope.user);
+    // se non sono loggato vai al login
+    $scope.login();
   } else {
     loggedUser(authData);
   }
@@ -325,7 +316,7 @@ angular
 
 })
 
-.controller('TripsCtrl', function($scope, trips, TripsService, $timeout) {
+.controller('TripsCtrl', function($scope, TripsService, $timeout) {
   //mi servono i trips per utente
   //ref = TripsService.getRef();
   $timeout(function(){
@@ -334,64 +325,121 @@ angular
     $scope.profilePic = TripsService.getProfilePic();
   },2000);
 
-  // TEST WATCH DATA IN SERVICE
-  // $scope.$watch( function () { return TripsService.user; }, function ( user ) {
-  //   $scope.user = user;
-  // });
+  // Controlla la variabile user nel service e la aggiorna nel controller
+  $scope.$watch( function () { return TripsService.getUser(); }, function ( user ) {
+    $scope.user = user;
+  });
 
-  //$scope.trips = TripsService.getTrips();
-  $scope.trips = trips;
+  $scope.trips = TripsService.getTrips();
   //console.log(trips);
 
 
 })
 
-.controller('TripCtrl', function($scope, tripRef, $stateParams, $timeout, TripsService) {
+.controller('TripCtrl', function($scope, tripRef, $stateParams, $state, $timeout, TripsService) {
   //  mi serve:
   //    - dettaglio del trip
   //    - dettaglio degli amici
-  $timeout(function(){
+  //$timeout(function(){
     //va bene solo se l'utente è già loggato...
-    $scope.uid = TripsService.getUID();
-    $scope.user = TripsService.getUser();
-    $scope.profilePic = TripsService.getProfilePic();
+    $scope.$watch( function () { return TripsService.getUser(); }, function ( user ) {
+      $scope.user = user;
+    });
+    $scope.$watch( function () { return TripsService.getUID(); }, function ( uid ) {
+      $scope.uid = uid;
+    });
+    $scope.$watch( function () { return TripsService.getProfilePic(); }, function ( profilePic ) {
+      $scope.profilePic = profilePic;
+    });
+
+    //$scope.uid = TripsService.getUID();
+    //$scope.user = TripsService.getUser();
+    //$scope.profilePic = TripsService.getProfilePic();
+    $scope.datePicker = {};
+    $scope.options = {
+      autoApply: true,
+      opens: "left",
+      // startDate: "2015/11/09",
+      // endDate: "2015/12/09",
+      locale: {
+       format: "DD/MM/YYYY",
+       separator: " / ",
+       fromLabel: "From",
+       toLabel: "To",
+       daysOfWeek: [
+           "Su",
+           "Mo",
+           "Tu",
+           "We",
+           "Th",
+           "Fr",
+           "Sa"
+       ],
+       monthNames: [
+           "January",
+           "February",
+           "March",
+           "April",
+           "May",
+           "June",
+           "July",
+           "August",
+           "September",
+           "October",
+           "November",
+           "December"
+       ],
+       firstDay: 1,
+      },
+      eventHandlers: {'apply.daterangepicker': function(ev, picker) {
+        console.log(picker);
+        console.log("start date: " + picker.startDate._d);
+        console.log("end date: " + picker.endDate._d);
+      }}
+    };
 
     if ($stateParams.tripId == 'newTrip') {
+
+      $scope.trip = {};
       $scope.newTrip = true;
       $scope.editable = true;
+      $scope.datePicker.date = {startDate: null, endDate: null};
 
       $scope.createTrip = function() {
-        //da finire
+
         ref = TripsService.getRef();
         newTrip = ref.child('trips').push({
-          example:     true,
-          // title:      $scope.trip.title,
-          // subtitle:   $scope.trip.subtitle,
-          // where:      $scope.trip.where,
-          // from:       $scope.trip.from,
-          // to:         $scope.trip.to,
-          admin:       $scope.uid,
+          title:      $scope.trip.title || null,
+          subtitle:   $scope.trip.subtitle || null,
+          where:      $scope.trip.where || null,
+          from:       $scope.datePicker.date.startDate._d.getTime() || null,
+          to:         $scope.datePicker.date.endDate._d.getTime() || null,
+          admin:      $scope.uid || null,
         });
 
-
-        //aggiorno la lista dei trip dell'utente
+        //aggiorno la lista dei trip dell'utente, vediamo se conviene mettere la lista degli utenti direttamente sul trip
         ref.child('users').child($scope.uid).child('trips').once("value", function(snap){
           tripsOld = snap.val() || [];
           tripsNew = tripsOld;
           tripsNew.push(newTrip.key());
           ref.child('users').child($scope.uid).child('trips').set(tripsNew);
         });
+
+        //torna alla lista dei trip
+        $state.go('app.trips', {'navDirection':'backward'});
+
       }
+    }else{
+      tripRef.once("value", function(snap) {
+        $scope.trip = snap.val();
+        console.log($scope.trip);
+        $scope.datePicker.date = {startDate: $scope.trip.from, endDate: $scope.trip.to};
+      });
     }
 
-  },2000);
+  //},2000);
 
 
-
-  tripRef.once("value", function(snap) {
-    $scope.trip = snap.val();
-    console.log($scope.trip);
-  });
 
   // FB.api('me/friends', { fields: 'id, first_name,picture', limit: 6 },function(response){
   //
