@@ -19,14 +19,15 @@
       on-refresh="doRefresh()">
     </ion-refresher>
     <ion-list>
-      <!-- Il filtro non mostra l'amministratore -->
-      <ion-checkbox ng-repeat="friend in trip.friends | filter:search | filter:{admin:false}"
+      <!-- mettere il checkbox solo su i mates, aggiungere il pulsante sei sicuro di invitare nuovi amici? -->
+      <ion-checkbox ng-repeat="friend in mates | filter:search | orderBy:'surname'"
                     ng-model="friend.checked"
                     ng-checked="friend.checked"
-                    class="item-avatar-left item-checkbox-right item-button-right">
-        <img ng-src="{{friend.img}}">
+                    class="item-avatar-left item-checkbox-right item-button-right"
+                    ng-if='friend.$id!=trip.admin'>
+        <img ng-src="{{friend.url}}" ng-if='friend.url'>
+        <img ng-src="/img/avatar.png" ng-if='!friend.url'>
         <h2>{{friend.name}} {{friend.surname}}</h2>
-        <p>{{friend.other}}</p>
         <!-- <a class="button button-balanced button-outline">invite</a> -->
       </ion-checkbox>
 

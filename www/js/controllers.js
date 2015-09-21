@@ -1,56 +1,4 @@
-angular
-
-.module('starter.controllers', ['firebase', 'ngCordova', 'webcam', 'daterangepicker'])
-
-
-.factory('TripsService', function($firebaseArray, $firebaseAuth){
-
-  var rootRef = new Firebase("https://radiant-heat-1148.firebaseio.com/");
-  //var userRef = new Firebase("https://radiant-heat-1148.firebaseio.com/users/");
-  //var users = $firebaseArray(userRef);
-  var user = null;
-  var uid = null;
-  var profilePic = null;
-
-  return {
-    setUser: function(utente) {
-      user = utente;
-    },
-    setProfilePic: function(pic) {
-      profilePic = pic;
-    },
-    getAuth: function () {
-      return $firebaseAuth(rootRef.child("users"));
-    },
-    getUser: function () {
-      return user;
-    },
-    getProfilePic: function() {
-      return profilePic;
-    },
-    getTrips: function () {
-      return $firebaseArray(rootRef.child("trips"));
-    },
-    getTripRef: function(tripId) {
-      return rootRef.child("trips").child(tripId);
-    },
-    getPhotos: function() {
-      return $firebaseArray(rootRef.child("photos"));
-    },
-    getRef: function () {
-      return rootRef;
-    },
-    setUID: function (id) {
-      uid = id;
-    },
-    getUID: function() {
-      return uid;
-    },
-  };
-
-})
-
-.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup, $rootScope, TripsService) {
+module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup, $rootScope, $ionicLoading, ngFB, TripsService) {
   // mi dati che servono:
   //  - Utente con dettaglio
   //      . name
@@ -87,6 +35,12 @@ angular
     scope: $scope
   }).then(function(modal) {
     $scope.modal = modal;
+  });
+
+  //loader
+  $scope.loading = $ionicLoading.show({
+    template: '<ion-spinner icon="spiral"></ion-spinner><br>Loading...',
+    //noBackdrop: true,
   });
 
   // Open the login modal
@@ -143,6 +97,20 @@ angular
       //  console.log(error);
       //}
     //});
+
+
+    // ngFB.login({scope: 'email,user_friends'}).then(
+    //     function (response) {
+    //         if (response.status === 'connected') {
+    //             //auth.$authWithOAuthToken('facebook', token, function() {
+    //               console.log('Facebook login succeeded');
+    //               $scope.closeLogin();
+    //             //});
+    //         } else {
+    //             alert('Facebook login failed');
+    //         }
+    //     });
+
   }
 
   //comprende tutte le attività da fare quando ci si loogga
@@ -179,6 +147,7 @@ angular
               id:           authData.facebook.id,
               locale:       authData.facebook.cachedUserProfile.locale,
               link:         authData.facebook.cachedUserProfile.link,
+              url:          authData.facebook.profileImageURL,
               trips:        {},
               //privacy:    'X',
               provider:     'facebook',
@@ -190,10 +159,14 @@ angular
           $scope.user = snap.val();
           TripsService.setUser($scope.user);
           console.log($scope.user);
+          //nasconde il loader
+          $scope.loading = $ionicLoading.hide();
         });
       }else {
         TripsService.setUser($scope.user);
         console.log($scope.user);
+        //nasconde il loader
+        $scope.loading = $ionicLoading.hide();
       }
 
 
@@ -205,9 +178,12 @@ angular
     console.log("Not logged in yet");
     $scope.profilePic = "/img/anonimo.png";
     $scope.user = null;
+    $scope.uid = null;
     TripsService.setUser($scope.user);
-    // se non sono loggato vai al login
-    $scope.login();
+    TripsService.setUID($scope.uid);
+    // se non sono loggato, nascondi il loader e vai al login
+    $scope.loading = $ionicLoading.hide();
+    //$scope.login();
   } else {
     loggedUser(authData);
   }
@@ -284,7 +260,7 @@ angular
           //   }
           // }
 
-          //inserisce tra gli users i dettagli dell'utente reistrato
+          //inserisce tra gli users i dettagli dell'utente registrato
           ref.child("users").child(userData.uid).set({
                 email:        $scope.loginData.email,
                 name:         $scope.loginData.name || null,
@@ -292,7 +268,6 @@ angular
                 birth_date:   $scope.loginData.birthday ? $scope.loginData.birthday.getTime() : null,
                 reg_date:     Firebase.ServerValue.TIMESTAMP,
                 gender:       $scope.loginData.gender || null,
-                trips:        {},
                 privacy:      $scope.loginData.privacy || false,
                 provider:     'password',
           });
@@ -305,14 +280,6 @@ angular
       $scope.showConfirm("Please enter at least mail and password");
     };
   }
-
-//se non sono loggato si deve aprire il login!!
-// $timeout(function() {
-//   if (!$scope.user) {
-//     $scope.login();
-//   }
-// }, 2000)
-
 
 })
 
@@ -329,6 +296,9 @@ angular
   $scope.$watch( function () { return TripsService.getUser(); }, function ( user ) {
     $scope.user = user;
   });
+  $scope.$watch( function () { return TripsService.getUID(); }, function ( uid ) {
+    $scope.uid = uid;
+  });
 
   $scope.trips = TripsService.getTrips();
   //console.log(trips);
@@ -340,21 +310,23 @@ angular
   //  mi serve:
   //    - dettaglio del trip
   //    - dettaglio degli amici
-  //$timeout(function(){
-    //va bene solo se l'utente è già loggato...
+
+  $scope.tripId = $stateParams.tripId;
+
     $scope.$watch( function () { return TripsService.getUser(); }, function ( user ) {
       $scope.user = user;
     });
     $scope.$watch( function () { return TripsService.getUID(); }, function ( uid ) {
       $scope.uid = uid;
+      //se cambia lo user aggiorno se è amministratore per il trip
+      if ($scope.trip) {
+        $scope.imAdmin = ($scope.trip.admin == $scope.uid) ? true : null;
+      }
     });
     $scope.$watch( function () { return TripsService.getProfilePic(); }, function ( profilePic ) {
       $scope.profilePic = profilePic;
     });
 
-    //$scope.uid = TripsService.getUID();
-    //$scope.user = TripsService.getUser();
-    //$scope.profilePic = TripsService.getProfilePic();
     $scope.datePicker = {};
     $scope.options = {
       autoApply: true,
@@ -392,9 +364,8 @@ angular
        firstDay: 1,
       },
       eventHandlers: {'apply.daterangepicker': function(ev, picker) {
-        console.log(picker);
-        console.log("start date: " + picker.startDate._d);
-        console.log("end date: " + picker.endDate._d);
+        //console.log(picker);
+        console.log("start date: " + picker.startDate._d + " end date: " + picker.endDate._d);
       }}
     };
 
@@ -405,24 +376,21 @@ angular
       $scope.editable = true;
       $scope.datePicker.date = {startDate: null, endDate: null};
 
+
       $scope.createTrip = function() {
+        $scope.mates = [];
+        $scope.mates.push($scope.uid);
 
         ref = TripsService.getRef();
-        newTrip = ref.child('trips').push({
+        $scope.trip = ref.child('trips').push({
           title:      $scope.trip.title || null,
           subtitle:   $scope.trip.subtitle || null,
           where:      $scope.trip.where || null,
-          from:       $scope.datePicker.date.startDate._d.getTime() || null,
-          to:         $scope.datePicker.date.endDate._d.getTime() || null,
+          from:       $scope.datePicker.date.startDate ? $scope.datePicker.date.startDate._d.getTime() : null,
+          to:         $scope.datePicker.date.endDate ? $scope.datePicker.date.endDate._d.getTime() : null,
           admin:      $scope.uid || null,
-        });
-
-        //aggiorno la lista dei trip dell'utente, vediamo se conviene mettere la lista degli utenti direttamente sul trip
-        ref.child('users').child($scope.uid).child('trips').once("value", function(snap){
-          tripsOld = snap.val() || [];
-          tripsNew = tripsOld;
-          tripsNew.push(newTrip.key());
-          ref.child('users').child($scope.uid).child('trips').set(tripsNew);
+          mates:      $scope.mates,
+          url:        '/img/random/' + Math.floor((Math.random() * 10) + 1) + '.jpeg',
         });
 
         //torna alla lista dei trip
@@ -435,11 +403,41 @@ angular
         console.log($scope.trip);
         $scope.datePicker.date = {startDate: $scope.trip.from, endDate: $scope.trip.to};
       });
+
+      $scope.mates = TripsService.getUsers();
+      console.log($scope.mates);
     }
 
-  //},2000);
+  })
 
+.controller('FriendsCtrl', function($scope, tripRef, $stateParams, TripsService){
+  // mi serve:
+  //    - dettaglio del trip
+  //    - dettaglio degli amici
+  tripRef.once("value", function(snap) {
+    $scope.trip = snap.val();
+    //console.log($scope.trip);
+  });
 
+  $scope.mates = TripsService.getUsers();
+  //console.log($scope.mates);
+
+  //FACEBOOK LIST OF FRIENDS
+
+  // auth = TripsService.getAuth();
+  // authData = auth.$getAuth();
+  // token = authData.token;
+  //
+  // var params = {access_token: token , fields: 'last_name',}; //, components: 'country:ES'};
+  // return $http.get(
+  //   'https://graph.facebook.com/967069890020707',
+  //   {params: params}
+  // ).then(function(response) {
+  //   console.log(response);
+  // });
+
+  // var tokenStore = {}
+  // tokenStore.fbAccessToken = authData.token;
 
   // FB.api('me/friends', { fields: 'id, first_name,picture', limit: 6 },function(response){
   //
@@ -447,16 +445,21 @@ angular
   //
   // });
 
-  })
+  // ngFB.api({
+  //       path: '/me',
+  //       params: {fields: 'id,name'}
+  //   }).then(
+  //       function (user) {
+  //           $scope.user = user;
+  //       },
+  //       function (error) {
+  //           alert('Facebook error: ' + error.error_description);
+  //       });
 
-.controller('FriendsCtrl', function($scope, $stateParams, TripsService, $timeout){
-  // mi serve:
-  //    - dettaglio del trip
-  //    - dettaglio degli amici
 
 })
 
-.controller('AlbumCtrl', function($scope, $state, $stateParams, TripsService, $cordovaSocialSharing){
+.controller('AlbumCtrl', function($scope, $stateParams, TripsService){
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio delle foto
@@ -484,27 +487,4 @@ angular
   // dettaglio foto
 
 
-})
-
-
-.filter('myTrips', function(){
-
-  return function(items, trips){
-
-    var arrayToReturn = [];
-    if (trips) {
-      for (var i=0; i<items.length; i++){
-        for(var j=0; j<trips.length; j++){
-          //il parse int serve solo se è numerico l'ID del trip
-          //creando un ID in lettere è da togliere
-          if (items[i].$id == trips[j]) {
-            arrayToReturn.push(items[i]);
-            break;
-          }
-        }
-      }
-    }
-    return arrayToReturn;
-
-  };
 });

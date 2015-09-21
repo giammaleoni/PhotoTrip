@@ -1,7 +1,8 @@
 <ion-view title="{{trip.title}}">
 
-  <ion-nav-buttons side="right"> <!-- da implementare filtro del pulsante se admin ng-if="utente == filter{trip.friends.admin:true}.include?(user)"> -->
-    <label class="toggle toggle-positive" ng-hide='newTrip'>
+  <ion-nav-buttons side="right">
+    <!-- nascondo il checkbox per abilitare le modifiche se è un nuovo trip o se non sono l'amministratore del viaggio -->
+    <label class="toggle toggle-positive"  ng-hide='newTrip+!imAdmin'>
       <input type="checkbox" ng-model='$parent.editable'>
       <div class="track">
         <div class="handle"></div>
@@ -36,18 +37,33 @@
             <div class="list card">
                 <div class="item item-stable item-button-right">
             Trip Mates
-            <a class="button button-positive button-clear" ng-href="#/app/trips/{{trip.id}}/friends" ng-disabled="!editable">Edit</a>
+            <a class="button button-positive button-clear" ng-href="#/app/trips/{{tripId}}/friends" ng-disabled="!editable">Edit</a>
             </div>
                 <div class="item item-body">
-                    <ion-list >
-                        <ion-item ng-repeat="friend in trip.friends | filter:{checked:true}"
-                                  class="item-avatar-left" >
-                            <img ng-src="{{friend.img}}">
-                            <span class="item-note" ng-if="friend.admin">
+                    <ion-list>
+                        <!-- me -->
+                        <ion-item class="item-avatar-left" ng-if='newTrip'>
+                            <img ng-src="{{profilePic}}">
+                            <span class="item-note" ng-if="imAdmin">
                               Admin
                             </span>
-                            <h2>{{friend.name}} {{friend.surname}}</h2>
-                            <p>{{friend.other}}</p>
+                            <span class="item-note" ng-if="newTrip">
+                              Admin
+                            </span>
+                            <h2>{{user.name}} {{user.surname}}</h2>
+                            <!-- <p>{{user.other}}</p> -->
+                        </ion-item>
+                        <!-- my friends -->
+                        <ion-item ng-repeat="mate in mates | orderBy:'surname' | myMates:trip.mates"
+                                  class="item-avatar-left" >
+                            <img ng-src="{{mate.url}}" ng-if='mate.url'>
+                            <img ng-src="/img/avatar.png" ng-if='!mate.url'>
+                            <!-- ng-if se è amministratore -->
+                            <span class="item-note" ng-if="trip.admin==mate.$id">
+                              Admin
+                            </span>
+                            <h2>{{mate.name}} {{mate.surname}}</h2>
+                            <!-- <p>{{friend.other}}</p> -->
                         </ion-item>
                     </ion-list>
                 </div>
