@@ -1,8 +1,13 @@
 <ion-view view-title="Select Friends">
   <ion-nav-bar>
-    <ion-nav-back-button class="button-clear">
+    <ion-nav-back-button class="button-clear" ng-click=checkMod()>
     </ion-nav-back-button>
   </ion-nav-bar>
+
+  <ion-nav-buttons side="right">
+    <!-- nascondo il checkbox per abilitare le modifiche se è un nuovo trip o se non sono l'amministratore del viaggio -->
+    <a class="button button-balanced button-clear" ng-disabled="!save">Save</a>
+  </ion-nav-buttons>
 
   <ion-header-bar class="bar-subheader no-padding no-border" padding="false">
     <div class="bar bar-header item-input-inset">
@@ -20,13 +25,16 @@
     </ion-refresher>
     <ion-list>
       <!-- mettere il checkbox solo su i mates, aggiungere il pulsante sei sicuro di invitare nuovi amici? -->
-      <ion-checkbox ng-repeat="friend in mates | filter:search | orderBy:'surname'"
+      <!-- ordinare per amici preferiti -->
+      <ion-checkbox ng-repeat="friend in users | filter:search | orderBy:['surname']"
+                    ng-checked=check(friend)
                     ng-model="friend.checked"
-                    ng-checked="friend.checked"
                     class="item-avatar-left item-checkbox-right item-button-right"
-                    ng-if='friend.$id!=trip.admin'>
+                    ng-if='friend.$id!=trip.admin'
+                    ng-click='addDeleteMate(friend)'>
         <img ng-src="{{friend.url}}" ng-if='friend.url'>
-        <img ng-src="/img/avatar.png" ng-if='!friend.url'>
+        <!-- da modificare con un profile pic -->
+        <img ng-src="img/avatar.png" ng-if='!friend.url'>
         <h2>{{friend.name}} {{friend.surname}}</h2>
         <!-- <a class="button button-balanced button-outline">invite</a> -->
       </ion-checkbox>

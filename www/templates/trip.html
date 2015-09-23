@@ -57,7 +57,7 @@
                         <ion-item ng-repeat="mate in mates | orderBy:'surname' | myMates:trip.mates"
                                   class="item-avatar-left" >
                             <img ng-src="{{mate.url}}" ng-if='mate.url'>
-                            <img ng-src="/img/avatar.png" ng-if='!mate.url'>
+                            <img ng-src="img/avatar.png" ng-if='!mate.url'>
                             <!-- ng-if se è amministratore -->
                             <span class="item-note" ng-if="trip.admin==mate.$id">
                               Admin

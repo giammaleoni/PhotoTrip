@@ -122,16 +122,16 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     userData = ref.child('users').child(authData.uid);
     switch (authData.provider) {
       case 'password':
-        $scope.profilePic = authData.password.profileImageURL || "/img/anonimo.png";
+        $scope.profilePic = authData.password.profileImageURL || "img/anonimo.png";
         break;
       case 'facebook':
-        $scope.profilePic = authData.facebook.profileImageURL || "/img/anonimo.png";
+        $scope.profilePic = authData.facebook.profileImageURL || "img/anonimo.png";
         break;
       default:
 
     }
 
-    //$scope.profilePic = authData.password.profileImageURL || "/img/anonimo.png";
+    //$scope.profilePic = authData.password.profileImageURL || "img/anonimo.png";
     userData.once("value", function(snap) {
       $scope.user = snap.val();
 
@@ -176,7 +176,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
   auth.$onAuth(function(authData) {
   if (authData === null) {
     console.log("Not logged in yet");
-    $scope.profilePic = "/img/anonimo.png";
+    $scope.profilePic = "img/anonimo.png";
     $scope.user = null;
     $scope.uid = null;
     TripsService.setUser($scope.user);
@@ -197,7 +197,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
       if (authData){
         console.log("user:", authData.uid, "still logged");
       }else{
-        // $scope.profilePic = "/img/anonimo.png";
+        // $scope.profilePic = "img/anonimo.png";
         // $scope.user = null;
         // TripsService.setUser($scope.user);
         // console.log("User logged out");
@@ -390,7 +390,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
           to:         $scope.datePicker.date.endDate ? $scope.datePicker.date.endDate._d.getTime() : null,
           admin:      $scope.uid || null,
           mates:      $scope.mates,
-          url:        '/img/random/' + Math.floor((Math.random() * 10) + 1) + '.jpeg',
+          url:        'img/random/' + Math.floor((Math.random() * 10) + 1) + '.jpeg',
         });
 
         //torna alla lista dei trip
@@ -419,8 +419,45 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     //console.log($scope.trip);
   });
 
-  $scope.mates = TripsService.getUsers();
-  //console.log($scope.mates);
+  $scope.save = false;
+  $scope.users = TripsService.getUsers();
+
+  $scope.check = function(mate) {
+    if($scope.trip){
+      for (var i = 0; i < $scope.trip.mates.length; i++) {
+        if ($scope.trip.mates[i] == mate.$id) {
+          return true;
+        }
+      }
+    }
+  }
+
+  $scope.addDeleteMate = function(mate) {
+    //se metto il tutto in un aray temp (es. temp = $scope.trip.mates)
+    //quando esco o premo salva (in alto a dx) mando l'aggiornamento diversamente no
+
+    $scope.save = true;
+
+    //console.log($scope.mates);
+    console.log($scope.trip.mates);
+    if (mate.checked) {
+      //add to trip.mates
+      $scope.trip.mates.push(mate.$id);
+
+    } else {
+      //delete from trip.mates
+      var index = $scope.trip.mates.indexOf(mate.$id);
+      if (index > -1) {
+        $scope.trip.mates.splice(index, 1);
+      }
+    }
+    //tripRef.child("mates");
+  }
+
+  //controla se ci sono state modifiche e prompt per salvataggio
+  $scope.checkMod = function () {
+
+  }
 
   //FACEBOOK LIST OF FRIENDS
 
