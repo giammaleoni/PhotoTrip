@@ -433,30 +433,66 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
   }
 
   $scope.addDeleteMate = function(mate) {
-    //se metto il tutto in un aray temp (es. temp = $scope.trip.mates)
+    //se metto il tutto in un aray $scope.temp (es. $scope.temp = $scope.trip.mates)
     //quando esco o premo salva (in alto a dx) mando l'aggiornamento diversamente no
 
     $scope.save = true;
+    $scope.temp = angular.copy($scope.trip.mates);
 
     //console.log($scope.mates);
     console.log($scope.trip.mates);
-    if (mate.checked) {
-      //add to trip.mates
-      $scope.trip.mates.push(mate.$id);
-
+    var jndex = $scope.trip.mates.indexOf(mate.$id);
+    // se trovo il record nello storico lo posso solo togliere
+    //diversamente disabilito il salva
+    if (jndex > -1 ){
+      if (mate.checked) {
+        $scope.save = false;
+      } else {
+        //delete from trip.mates
+        var index = $scope.temp.indexOf(mate.$id);
+        if (index > -1) {
+          $scope.temp.splice(index, 1);
+        }
+      }
+    // se non trovo il record nello storico lo posso solo aggiungere
+    // diversamente disabilito il salva
     } else {
-      //delete from trip.mates
-      var index = $scope.trip.mates.indexOf(mate.$id);
-      if (index > -1) {
-        $scope.trip.mates.splice(index, 1);
+      if (mate.checked) {
+        //add to trip.mates
+        $scope.temp.push(mate.$id);
+      } else {
+        $scope.save = false;
       }
     }
-    //tripRef.child("mates");
   }
 
-  //controla se ci sono state modifiche e prompt per salvataggio
+  //controlla se ci sono state modifiche e prompt per salvataggio
   $scope.checkMod = function () {
+    //prevent default go back
 
+    if ($scope.save) {
+      $ionicPopup.confirm({
+        title: 'Save',
+        template: 'Do you want to save changes?',
+        okText: 'Yes',
+        cancelText: 'No'
+      }).then(function(yes) {
+        if (yes) {
+          // push changes
+
+        }else {
+          //do nothing
+
+        }
+        //go back
+      });
+    }
+  }
+
+  $scope.saveMod = function() {
+    if ($scope.temp!=$scope.trip.mates) {
+      tripRef.child("mates").set($scope.temp);
+    }
   }
 
   //FACEBOOK LIST OF FRIENDS
