@@ -400,17 +400,22 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     }else{
       tripRef.once("value", function(snap) {
         $scope.trip = snap.val();
-        console.log($scope.trip);
+        //console.log($scope.trip);
         $scope.datePicker.date = {startDate: $scope.trip.from, endDate: $scope.trip.to};
       });
 
       $scope.mates = TripsService.getUsers();
-      console.log($scope.mates);
+      //console.log($scope.mates);
     }
+
+    tripRef.child("mates").on("child_changed", function(snap) {
+      $scope.trip.mates = snap.val();
+      console.log($scope.trip.mates);
+    });
 
   })
 
-.controller('FriendsCtrl', function($scope, tripRef, $stateParams, TripsService){
+.controller('FriendsCtrl', function($scope, tripRef, $stateParams, $window, $ionicPopup, TripsService){
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio degli amici
@@ -437,19 +442,22 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     //quando esco o premo salva (in alto a dx) mando l'aggiornamento diversamente no
 
     $scope.save = true;
-    $scope.temp = angular.copy($scope.trip.mates);
+    if (!$scope.temp) {
+      $scope.temp = angular.copy($scope.trip.mates);
+    }
+
 
     //console.log($scope.mates);
     console.log($scope.trip.mates);
     var jndex = $scope.trip.mates.indexOf(mate.$id);
+    var index = $scope.temp.indexOf(mate.$id);
     // se trovo il record nello storico lo posso solo togliere
     //diversamente disabilito il salva
     if (jndex > -1 ){
-      if (mate.checked) {
+      if (mate.checked && index > -1) {
         $scope.save = false;
       } else {
         //delete from trip.mates
-        var index = $scope.temp.indexOf(mate.$id);
         if (index > -1) {
           $scope.temp.splice(index, 1);
         }
@@ -457,13 +465,14 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     // se non trovo il record nello storico lo posso solo aggiungere
     // diversamente disabilito il salva
     } else {
-      if (mate.checked) {
+      if (mate.checked && index < 0) {
         //add to trip.mates
         $scope.temp.push(mate.$id);
       } else {
         $scope.save = false;
       }
     }
+    console.log($scope.temp);
   }
 
   //controlla se ci sono state modifiche e prompt per salvataggio
@@ -479,19 +488,20 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
       }).then(function(yes) {
         if (yes) {
           // push changes
-
+          $scope.saveMod();
         }else {
           //do nothing
-
         }
-        //go back
       });
     }
+    //go back
+    $window.history.back();
   }
 
   $scope.saveMod = function() {
     if ($scope.temp!=$scope.trip.mates) {
       tripRef.child("mates").set($scope.temp);
+      $scope.save = false;
     }
   }
 
