@@ -394,7 +394,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
         });
 
         //torna alla lista dei trip
-        $state.go('app.trips', {'navDirection':'backward'});
+        //$state.go('app.trips', {'navDirection':'backward'});
 
       }
     }else{
@@ -406,16 +406,17 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
 
       $scope.mates = TripsService.getUsers();
       //console.log($scope.mates);
+
+      tripRef.on("child_changed", function(snap) {
+        $scope.trip.mates = snap.val();
+      });
     }
 
-    tripRef.child("mates").on("child_changed", function(snap) {
-      $scope.trip.mates = snap.val();
-      console.log($scope.trip.mates);
-    });
+
 
   })
 
-.controller('FriendsCtrl', function($scope, tripRef, $stateParams, $window, $ionicPopup, TripsService){
+.controller('FriendsCtrl', function($scope, tripRef, $stateParams, $window, $ionicPopup, $ionicLoading, TripsService){
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio degli amici
@@ -446,29 +447,31 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
       $scope.temp = angular.copy($scope.trip.mates);
     }
 
-
-    //console.log($scope.mates);
-    console.log($scope.trip.mates);
-    var jndex = $scope.trip.mates.indexOf(mate.$id);
+    // console.log($scope.trip.mates);
     var index = $scope.temp.indexOf(mate.$id);
-    // se trovo il record nello storico lo posso solo togliere
-    //diversamente disabilito il salva
-    if (jndex > -1 ){
-      if (mate.checked && index > -1) {
-        $scope.save = false;
-      } else {
-        //delete from trip.mates
-        if (index > -1) {
-          $scope.temp.splice(index, 1);
-        }
-      }
-    // se non trovo il record nello storico lo posso solo aggiungere
-    // diversamente disabilito il salva
-    } else {
-      if (mate.checked && index < 0) {
-        //add to trip.mates
+
+    if (mate.checked) {
+      //flag si
+      if (index = -1) {
         $scope.temp.push(mate.$id);
-      } else {
+        if (($scope.temp.length == $scope.trip.mates.length) && $scope.temp.every(function(element, index) {
+            return element === $scope.trip.mates[index]; })) {
+          $scope.save = false;
+        }
+      }else{
+        $scope.save = false;
+      }
+
+
+    }else{
+      //flag no
+      if (index > -1) {
+        $scope.temp.splice(index, 1);
+        if (($scope.temp.length == $scope.trip.mates.length) && $scope.temp.every(function(element, index) {
+            return element === $scope.trip.mates[index]; })) {
+          $scope.save = false;
+        }
+      }else {
         $scope.save = false;
       }
     }
@@ -477,8 +480,6 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
 
   //controlla se ci sono state modifiche e prompt per salvataggio
   $scope.checkMod = function () {
-    //prevent default go back
-
     if ($scope.save) {
       $ionicPopup.confirm({
         title: 'Save',
@@ -499,10 +500,10 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
   }
 
   $scope.saveMod = function() {
-    if ($scope.temp!=$scope.trip.mates) {
-      tripRef.child("mates").set($scope.temp);
+    tripRef.child("mates").set($scope.temp, function() {
+      $ionicLoading.show({ template: 'Saved', noBackdrop: true, duration: 1000 });
       $scope.save = false;
-    }
+    });
   }
 
   //FACEBOOK LIST OF FRIENDS
