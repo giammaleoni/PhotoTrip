@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js --> spostato sul services.js
-angular.module('starter', ['ionic', 'starter.controllers', 'ngOpenFB'])
+angular.module('starter', ['ionic', 'starter.controllers', 'ngOpenFB', 'ui.select', 'ngSanitize'])
 
 .run(function($ionicPlatform, ngFB) {
   $ionicPlatform.ready(function() {
@@ -25,7 +25,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngOpenFB'])
 
 })
 
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function($stateProvider, $urlRouterProvider, uiSelectConfig) {
 
   $stateProvider
 
@@ -133,4 +133,9 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngOpenFB'])
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/trips');
+
+  //select settings
+  uiSelectConfig.theme = 'bootstrap';
+  uiSelectConfig.resetSearchInput = true;
+  uiSelectConfig.appendToBody = true;
 });

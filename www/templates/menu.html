@@ -22,13 +22,13 @@
     </ion-header-bar>
     <ion-content>
       <ion-list>
-        <a class="item item-avatar item-button-right" ng-href="#/app/trips">
+        <a class="item item-avatar" ng-href="#/app/trips">
           <img ng-src="{{profilePic}}">
           <h3>{{user.name}}</h3>
           <h3>{{user.surname}}</h3>
           <p>{{user.email}}</p>
-          <button class="button button-outline button-small button-positive" ng-click="doLogout()" ng-if="user">Logout</button>
-          <button class="button button-outline button-small button-positive" ng-click="login()" ng-if="!user">Login</button>
+          <!-- <button class="button button-outline button-small button-positive" ng-click="doLogout()" ng-if="user">Logout</button> -->
+          <!-- <button class="button button-outline button-small button-positive" ng-click="login()" ng-if="!user">Login</button> -->
         </a>
         <ion-item menu-close ng-href="#/app/trips">
           Trips
@@ -47,5 +47,15 @@
         </ion-item> -->
       </ion-list>
     </ion-content>
+
+    <ion-footer-bar class="no-padding">
+      <button class="button button-outline button-full button-large icon-right ion-log-out button-positive no-margin"
+              ng-click=doLogout()
+              ng-if='user'>Logout</button>
+      <button class="button button-outline button-full button-large icon-right ion-log-in button-positive no-margin"
+              ng-click=login()
+              ng-if='!user'>Login</button>
+    </ion-footer-bar>
+
   </ion-side-menu>
 </ion-side-menus>

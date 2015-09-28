@@ -303,10 +303,9 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
   $scope.trips = TripsService.getTrips();
   //console.log(trips);
 
-
 })
 
-.controller('TripCtrl', function($scope, tripRef, $stateParams, $state, $timeout, TripsService) {
+.controller('TripCtrl', function($scope, tripRef, $stateParams, $state, $timeout, $http, TripsService) {
   //  mi serve:
   //    - dettaglio del trip
   //    - dettaglio degli amici
@@ -413,6 +412,18 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     }
 
 
+
+    //select per località
+    $scope.address = {};
+    $scope.refreshAddresses = function(address) {
+      var params = {address: address, sensor: false};
+      return $http.get(
+      'http://maps.googleapis.com/maps/api/geocode/json',
+      {params: params}
+      ).then(function(response) {
+      $scope.addresses = response.data.results
+      });
+    };
 
   })
 
