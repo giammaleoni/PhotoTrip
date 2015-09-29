@@ -20,10 +20,11 @@
 
             <div class="spacer" style="width: 300px; height: 26px;"></div>
 
-            <label class="item item-input" ng-if="!editable">
+            <label class="item item-input" ng-if="true">
+            <!-- ng-if="!editable"> -->
                 <i class="icon ion-location placeholder-icon positive"></i>
                 <span class="input-label">Where</span>
-                <input type="search" ng-model="trip.where" ng-disabled="true">
+                <input type="search" ng-model="trip.where" ng-disabled="!editable">
             </label>
 
             <!-- ng-controller con lista google -->
@@ -34,7 +35,8 @@
                          reset-search-input="false"
                          style="width: 100%; display:inline-block;"
                          ng-model="trip.where"
-                         ng-if="editable">
+                         ng-if="false">
+                         <!-- ng-if="editable"> -->
             			<ui-select-match placeholder="Where...">{{$select.selected.formatted_address}}</ui-select-match>
             			<ui-select-choices 	repeat="address in addresses track by $index"
             								refresh="refreshAddresses($select.search)"
@@ -62,10 +64,7 @@
                         <!-- me -->
                         <ion-item class="item-avatar-left" ng-if='newTrip'>
                             <img ng-src="{{profilePic}}">
-                            <span class="item-note" ng-if="imAdmin">
-                              Admin
-                            </span>
-                            <span class="item-note" ng-if="newTrip">
+                            <span class="item-note">
                               Admin
                             </span>
                             <h2>{{user.name}} {{user.surname}}</h2>

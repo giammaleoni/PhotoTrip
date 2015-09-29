@@ -115,10 +115,9 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
 
   //comprende tutte le attività da fare quando ci si loogga
   loggedUser = function(authData) {
-    console.log("Logged in as", authData.uid);
+    //console.log("Logged in as", authData.uid);
     TripsService.setUID(authData.uid);
-    console.log(authData);
-    //aggiungere l'utente di facebook alla registrazione in user
+    //console.log(authData);
     userData = ref.child('users').child(authData.uid);
     switch (authData.provider) {
       case 'password':
@@ -164,7 +163,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
         });
       }else {
         TripsService.setUser($scope.user);
-        console.log($scope.user);
+        //console.log($scope.user);
         //nasconde il loader
         $scope.loading = $ionicLoading.hide();
       }
@@ -283,14 +282,8 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
 
 })
 
-.controller('TripsCtrl', function($scope, TripsService, $timeout) {
+.controller('TripsCtrl', function($scope, TripsService, $timeout, $ionicPopup, $ionicListDelegate) {
   //mi servono i trips per utente
-  //ref = TripsService.getRef();
-  $timeout(function(){
-    //va bene solo se l'utente è già loggato...
-    $scope.user = TripsService.getUser();
-    $scope.profilePic = TripsService.getProfilePic();
-  },2000);
 
   // Controlla la variabile user nel service e la aggiorna nel controller
   $scope.$watch( function () { return TripsService.getUser(); }, function ( user ) {
@@ -299,10 +292,39 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
   $scope.$watch( function () { return TripsService.getUID(); }, function ( uid ) {
     $scope.uid = uid;
   });
+  $scope.$watch(function() { return TripsService.getProfilePic();}, function ( profilePic ) {
+    $scope.profilePic = profilePic;
+  });
 
+  //scarica tutti i trip, è il filtro a filtrarli
   $scope.trips = TripsService.getTrips();
-  //console.log(trips);
 
+  //cancella trip
+  $scope.delete = function (trip) {
+    $ionicPopup.confirm({
+      title: 'Delete Trip',
+      template: 'Do you really want to delet the trip?',
+      okText: 'Yes',
+      cancelText: 'No'
+    }).then(function(yes) {
+      if (yes) {
+        $scope.trips.$remove(trip).then(function(ref) {
+          console.log("removed: ", ref.key());
+        });
+      }else {
+        //chiude la option button
+        $ionicListDelegate.closeOptionButtons();
+      }
+    });
+
+  }
+
+  //condividi trip
+  $scope.share = function (trip) {
+    console.log("condividi: ", trip);
+    //si può inserire la scelta del tipo di condivisione
+    //vedi "action sheet" ionic
+  }
 })
 
 .controller('TripCtrl', function($scope, tripRef, $stateParams, $state, $timeout, $http, TripsService) {
@@ -312,17 +334,17 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
 
   $scope.tripId = $stateParams.tripId;
 
-    $scope.$watch( function () { return TripsService.getUser(); }, function ( user ) {
+    $scope.$watch( function() { return TripsService.getUser();}, function ( user ) {
       $scope.user = user;
     });
-    $scope.$watch( function () { return TripsService.getUID(); }, function ( uid ) {
+    $scope.$watch( function() { return TripsService.getUID();}, function ( uid ) {
       $scope.uid = uid;
       //se cambia lo user aggiorno se è amministratore per il trip
       if ($scope.trip) {
         $scope.imAdmin = ($scope.trip.admin == $scope.uid) ? true : null;
       }
     });
-    $scope.$watch( function () { return TripsService.getProfilePic(); }, function ( profilePic ) {
+    $scope.$watch(function() { return TripsService.getProfilePic();}, function ( profilePic ) {
       $scope.profilePic = profilePic;
     });
 
@@ -401,6 +423,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
         $scope.trip = snap.val();
         //console.log($scope.trip);
         $scope.datePicker.date = {startDate: $scope.trip.from, endDate: $scope.trip.to};
+        $scope.imAdmin = ($scope.trip.admin == $scope.uid) ? true : null;
       });
 
       $scope.mates = TripsService.getUsers();
