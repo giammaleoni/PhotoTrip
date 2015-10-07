@@ -1,5 +1,7 @@
 module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup, $rootScope, $ionicLoading, ngFB, TripsService) {
-  // mi dati che servono:
+//controller generico dell'applicazione.
+// gestisce il login
+  // i dati che servono:
   //  - Utente con dettaglio
   //      . name
   //      . uid
@@ -13,12 +15,12 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
   $scope.loginData = {};
 
   //pop up di conferma
-  $scope.showConfirm = function(error, oktext, canceltext){
+  $scope.showConfirm = function(error){
     var confirmPopup = $ionicPopup.confirm({
-      title: '', //'Validation Error',
+      title: 'Validation Error',
       template: error,
-      okText: oktext || 'Try Again',
-      cancelText: canceltext || 'Cancel'
+      okText: 'Try Again',
+      cancelText: 'Cancel'
     });
     confirmPopup.then(function(tryAgain) {
       if (tryAgain) {
@@ -40,7 +42,6 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
   //loader
   $scope.loading = $ionicLoading.show({
     template: '<ion-spinner icon="spiral"></ion-spinner><br>Loading...',
-    //noBackdrop: true,
   });
 
   // Open the login modal
@@ -76,6 +77,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     };
   }
 
+  //facebook login firebase
   auth = TripsService.getAuth();
   $scope.doFacebookLogin = function () {
     //CI SONO PROBLEMI A FARE IL LOGIN SENZA POPUP, NON PARTE L'EVENTO ONAUTH()
@@ -84,6 +86,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
       //non si può usare la console perchè il login avviene su unaltra pagina
     //}).catch(function(error) {
     //  if (error.code === "TRANSPORT_UNAVAILABLE") {
+
         auth.$authWithOAuthPopup("facebook", {
           //remember: "sessionOnly",
           scope: "email,user_friends",
@@ -97,6 +100,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
       //  console.log(error);
       //}
     //});
+
 
 
     // ngFB.login({scope: 'email,user_friends'}).then(
@@ -113,7 +117,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
 
   }
 
-  //comprende tutte le attività da fare quando ci si loogga
+  //comprende tutte le attività da fare quando ci si logga
   loggedUser = function(authData) {
     //console.log("Logged in as", authData.uid);
     TripsService.setUID(authData.uid);
@@ -122,6 +126,9 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     switch (authData.provider) {
       case 'password':
         $scope.profilePic = authData.password.profileImageURL || "img/anonimo.png";
+        userData.update({
+          url:          $scope.profilePic,
+        });
         break;
       case 'facebook':
         $scope.profilePic = authData.facebook.profileImageURL || "img/anonimo.png";
@@ -130,13 +137,12 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
 
     }
 
-    //$scope.profilePic = authData.password.profileImageURL || "img/anonimo.png";
     userData.once("value", function(snap) {
       $scope.user = snap.val();
-
       //se non esiste un utente registrato di facebook lo registro tra gli user
-      if (!$scope.user && authData.provider == 'facebook') {
-        ref.child("users").child(authData.uid).set({
+      //if (!$scope.user && authData.provider == 'facebook') {
+      if (authData.provider == 'facebook') {
+        ref.child("users").child(authData.uid).update({
               email:        authData.facebook.email,
               name:         authData.facebook.cachedUserProfile.first_name,
               surname:      authData.facebook.cachedUserProfile.last_name,
@@ -147,23 +153,28 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
               locale:       authData.facebook.cachedUserProfile.locale,
               link:         authData.facebook.cachedUserProfile.link,
               url:          authData.facebook.profileImageURL,
-              trips:        {},
-              //privacy:    'X',
               provider:     'facebook',
               age_range:    authData.facebook.cachedUserProfile.age_range
+        }, function(error) {
+          if (error) {
+            console.log('Synchronization failed');
+          } else {
+            console.log('Synchronization succeeded');
+          }
         });
 
         //controlla quando user cambia
-        userData.once("value", function(snap) {
+         userData.once("value", function(snap) {
           $scope.user = snap.val();
           TripsService.setUser($scope.user);
           console.log($scope.user);
           //nasconde il loader
           $scope.loading = $ionicLoading.hide();
-        });
-      }else {
+         });
+
+      }else {         //utente già registrato (solo login)
+      //
         TripsService.setUser($scope.user);
-        //console.log($scope.user);
         //nasconde il loader
         $scope.loading = $ionicLoading.hide();
       }
@@ -172,8 +183,9 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     });
   }
 
+  //controllo lo stato del login
   auth.$onAuth(function(authData) {
-  if (authData === null) {
+  if (authData === null) {                      //utente non loggato
     console.log("Not logged in yet");
     $scope.profilePic = "img/anonimo.png";
     $scope.user = null;
@@ -183,9 +195,11 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     // se non sono loggato, nascondi il loader e vai al login
     $scope.loading = $ionicLoading.hide();
     //$scope.login();
-  } else {
+  } else {                                      //utente loggato esegui attività di login
     loggedUser(authData);
   }
+
+  //setto la profile pic nel service
   TripsService.setProfilePic($scope.profilePic);
 });
 
@@ -220,65 +234,60 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     $scope.modal2.hide();
   };
 
-  $scope.doSignup = function() {
-    console.log('Doing signup', $scope.loginData);
-    var email = $scope.loginData.email;
-    var password = $scope.loginData.password;
-    if(email && password){
-      ref.createUser({
-        email: email,
-        password: password
-      }, function(error, userData) {
-        if (error) {
-          switch (error.code) {
-            case "EMAIL_TAKEN":
-              console.log("The new user account cannot be created because the email is already in use.");
-              $scope.showConfirm("The new user account cannot be created because the email is already in use.");
-            break;
-            case "INVALID_EMAIL":
-              console.log("The specified email is not a valid email.");
-              $scope.showConfirm("The specified email is not a valid email.");
-            break;
-            default:
-              console.log("Error creating user:", error);
-              $scope.showConfirm("Error creating user:" + error);
-          }
-        } else {
-          console.log("Successfully created user account with uid:", userData.uid);
+  //registrazione tramite mail
+  $scope.doSignup = function(form) {
+    if (form.$valid) {
+        console.log('Doing signup', $scope.loginData);
+        var email = $scope.loginData.email;
+        var password = $scope.loginData.password;
+        if(email && password && $scope.loginData.name && $scope.loginData.surname){
+          ref.createUser({
+            email: email,
+            password: password
+          }, function(error, userData) {
+            if (error) {
+              switch (error.code) {
+                case "EMAIL_TAKEN":
+                  console.log("The new user account cannot be created because the email is already in use.");
+                  $scope.showConfirm("The new user account cannot be created because the email is already in use.");
+                break;
+                case "INVALID_EMAIL":
+                  console.log("The specified email is not a valid email.");
+                  $scope.showConfirm("The specified email is not a valid email.");
+                break;
+                default:
+                  console.log("Error creating user:", error);
+                  $scope.showConfirm("Error creating user:" + error);
+              }
+            } else {
+              console.log("Successfully created user account with uid:", userData.uid);
 
-          //to get the name of the user
-          // find a suitable name based on the meta info given by each provider
-          // function getName(authData) {
-          //   switch(authData.provider) {
-          //      case 'password':
-          //        return authData.password.email.replace(/@.*/, '');
-          //      case 'twitter':
-          //        return authData.twitter.displayName;
-          //      case 'facebook':
-          //        return authData.facebook.displayName;
-          //   }
-          // }
+              //inserisce tra gli users i dettagli dell'utente registrato
+              ref.child("users").child(userData.uid).set({
+                    email:        $scope.loginData.email,
+                    name:         $scope.loginData.name || null,
+                    surname:      $scope.loginData.surname || null,
+                    birth_date:   $scope.loginData.birthday ? $scope.loginData.birthday.getTime() : null,
+                    reg_date:     Firebase.ServerValue.TIMESTAMP,
+                    gender:       $scope.loginData.gender || null,
+                    privacy:      $scope.loginData.privacy || false,
+                    provider:     'password',
+              });
 
-          //inserisce tra gli users i dettagli dell'utente registrato
-          ref.child("users").child(userData.uid).set({
-                email:        $scope.loginData.email,
-                name:         $scope.loginData.name || null,
-                surname:      $scope.loginData.surname || null,
-                birth_date:   $scope.loginData.birthday ? $scope.loginData.birthday.getTime() : null,
-                reg_date:     Firebase.ServerValue.TIMESTAMP,
-                gender:       $scope.loginData.gender || null,
-                privacy:      $scope.loginData.privacy || false,
-                provider:     'password',
+              //una volta registrato chiudo il signup ed eseguo il login
+              $scope.closeSignup();
+              $scope.doLogin();
+            }
           });
-          $scope.closeSignup();
-          $scope.doLogin();
         }
-      });
+        else{
+          $scope.showConfirm("Please enter at least required information: mail, password, name and surname");
+        };
+      } else {
+        console.log("Form not compiled correctly");
+      }
+
     }
-    else{
-      $scope.showConfirm("Please enter at least mail and password");
-    };
-  }
 
 })
 
@@ -415,7 +424,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
         });
 
         //torna alla lista dei trip
-        //$state.go('app.trips', {'navDirection':'backward'});
+        $state.go('app.trips', {'navDirection':'backward'});
 
       }
     }else{
