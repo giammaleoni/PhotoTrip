@@ -638,10 +638,6 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
         console.log(imageData);
         $scope.src = imageData;
 
-        //print photo information
-        CordovaExif.readData(imageData, function(exifObject) {
-          console.log("dettagli photo", exifObject);
-        });
       }, function(err) {
         console.err(err);
       });
