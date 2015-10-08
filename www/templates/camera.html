@@ -1,9 +1,35 @@
 <ion-view title="{{trip.title}}">
   <ion-content id='cameraPage' scroll='false'>
-    <webcam on-stream="onStream(stream)"
+    <!-- <webcam on-stream="onStream(stream)"
             on-streaming="onSuccess()"
             on-error="onError(err)"
             channel="myChannel">
-    </webcam>
+    </webcam> -->
+
+    <button class="button button-full button-positive"  ng-click="getPhoto()">Get Photo</button>
+    <img ng-src="{{src}}" style="max-width: 100%"></img>
+
+    <div class="tabs-striped tabs-bottom tabs-background-stable tabs-color-positive" ng-hide='newTrip'>
+      <div class="tabs tabs-icon-top">
+        <a class="tab-item" ng-href="#/app/trips/{{tripId}}">
+          <i class="icon ion-home"></i>
+          Home
+        </a>
+        <a class="tab-item" ng-href="#/app/trips/{{tripId}}/album">
+          <i class="icon ion-images"></i>
+          Album
+        </a>
+        <a class="tab-item" ng-href="#/app/trips/{{tripId}}/map">
+          <i class="icon ion-location"></i>
+          Map
+        </a>
+        <a class="tab-item active" ng-href="#/app/trips/{{tripId}}/camera">
+          <i class="icon ion-camera"></i>
+          Photo
+        </a>
+      </div>
+    </div>
+
+
   </ion-content>
 </ion-view>

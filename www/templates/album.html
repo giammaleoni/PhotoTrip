@@ -58,21 +58,21 @@
     </div>
   </ion-content>
 
-  <div class="tabs-striped tabs-bottom tabs-background-stable tabs-color-positive">
+  <div class="tabs-striped tabs-bottom tabs-background-stable tabs-color-positive" ng-hide='newTrip'>
     <div class="tabs tabs-icon-top">
-      <a class="tab-item" ng-href="#/app/trips/{{trip.id}}">
+      <a class="tab-item" ng-href="#/app/trips/{{tripId}}">
         <i class="icon ion-home"></i>
         Home
       </a>
-      <a class="tab-item active" ng-href="#/app/trips/{{trip.id}}/album">
+      <a class="tab-item active" ng-href="#/app/trips/{{tripId}}/album">
         <i class="icon ion-images"></i>
         Album
       </a>
-      <a class="tab-item" ng-href="#/app/trips/{{trip.id}}/map">
+      <a class="tab-item" ng-href="#/app/trips/{{tripId}}/map">
         <i class="icon ion-location"></i>
         Map
       </a>
-    <a class="tab-item" ng-href="#/app/trips/{{trip.id}}/camera">
+      <a class="tab-item" ng-href="#/app/trips/{{tripId}}/camera">
         <i class="icon ion-camera"></i>
         Photo
       </a>

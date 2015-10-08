@@ -24,7 +24,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngOpenFB', 'ui.selec
 
 })
 
-.config(function($stateProvider, $urlRouterProvider, uiSelectConfig) {
+.config(function($stateProvider, $urlRouterProvider, $compileProvider, uiSelectConfig) {
 
   $stateProvider
 
@@ -126,6 +126,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngOpenFB', 'ui.selec
       'menuContent': {
         templateUrl: 'templates/camera.html',
         controller: 'CameraCtrl',
+        resolve: {
+          tripRef: function($stateParams, TripsService) {
+            return TripsService.getTripRef($stateParams.tripId)
+          }
+        }
       }
     }
   })
@@ -137,4 +142,9 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngOpenFB', 'ui.selec
   uiSelectConfig.theme = 'bootstrap';
   uiSelectConfig.resetSearchInput = true;
   uiSelectConfig.appendToBody = true;
+
+  //whitelist per camera
+  //$compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel):/);
+  $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|file|blob|cdvfile):|data:image\//);
+
 });
