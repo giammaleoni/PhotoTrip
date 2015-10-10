@@ -1,0 +1,36 @@
+<div class="tabs-striped tabs-bottom tabs-background-stable tabs-color-positive" ng-hide='newTrip'>
+  <div class="tabs tabs-icon-top">
+    <a class="tab-item" ng-href="#/app/trips/{{tripId}}" ng-show="$state.current.name != 'app.trips/:tripId'">
+      <i class="icon ion-home"></i>
+      Home
+    </a>
+    <a class="tab-item active" ng-show="$state.current.name === 'app.trips/:tripId'">
+      <i class="icon ion-home"></i>
+      Home
+    </a>
+    <a class="tab-item" ng-href="#/app/trips/{{tripId}}/album" ng-show="$state.current.name != 'app.trips/:tripId/album'">
+      <i class="icon ion-images"></i>
+      Album
+    </a>
+    <a class="tab-item active" ng-show="$state.current.name === 'app.trips/:tripId/album'">
+      <i class="icon ion-images"></i>
+      Album
+    </a>
+    <a class="tab-item" ng-href="#/app/trips/{{tripId}}/map" ng-show="$state.current.name != 'app.trips/:tripId/map'">
+      <i class="icon ion-location"></i>
+      Map
+    </a>
+    <a class="tab-item active" ng-show="$state.current.name === 'app.trips/:tripId/map'">
+      <i class="icon ion-images"></i>
+      Map
+    </a>
+    <a class="tab-item" ng-href="#/app/trips/{{tripId}}/camera" ng-show="$state.current.name != 'app.trips/:tripId/camera'">
+      <i class="icon ion-camera"></i>
+      Photo
+    </a>
+    <a class="tab-item active" ng-show="$state.current.name === 'app.trips/:tripId/camera'">
+      <i class="icon ion-camera"></i>
+      Photo
+    </a>
+  </div>
+</div>

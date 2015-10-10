@@ -1,0 +1,28 @@
+Salvataggio foto in cartella
+  - interne
+  - nuove scaricate (proprietario diverso da uid) --> sviluppare funzionalità sono state aggiunte x foto al tuo viaggio
+
+Sfogliare foto
+
+Richiesta compagno di viaggio
+
+Nuove foto scattate --> chiedere "vuoi aggiungerle al tuo viaggio?"
+
+Share di:
+  - singola foto
+  - trip sottoforma di album
+
+Facebook login (openFB?)
+
+Estrarre info EXIF --> mappa Trip
+
+IN PIU PER VISUALIZZAZIONE GENERALE:
+  - tutte le foto
+  - tuttele foto sulla mappa
+
+pulsante "scattta foto per viaggio in corso" dal menu principale
+
+cambiare cartella --> creare cartella immagini app (controlare se esite, se non esiste creare!)
+cambiare nome file -->
+
+foto in formato URL --> readAsDataURL(path, file)??

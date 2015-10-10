@@ -159,7 +159,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
           if (error) {
             console.log('Synchronization failed');
           } else {
-            console.log('Synchronization succeeded');
+            //console.log('Synchronization succeeded');
           }
         });
 
@@ -342,6 +342,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
   //    - dettaglio degli amici
 
   $scope.tripId = $stateParams.tripId;
+  $scope.$state = $state;
 
     $scope.$watch( function() { return TripsService.getUser();}, function ( user ) {
       $scope.user = user;
@@ -463,6 +464,8 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio degli amici
+  $scope.tripId = $stateParams.tripId;
+
   tripRef.once("value", function(snap) {
     $scope.trip = snap.val();
     //console.log($scope.trip);
@@ -586,68 +589,95 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
 
 })
 
-.controller('AlbumCtrl', function($scope, $stateParams, TripsService){
+.controller('AlbumStoryCtrl', function($scope, $stateParams, TripsService){
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio delle foto
 
 })
 
-.controller('AlbumChessboardCtrl', function($scope, $state, $stateParams, TripsService){
+.controller('AlbumCtrl', function($scope, $stateParams, $state, TripsService, $cordovaCamera, $cordovaFile){
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio delle foto
+  photoArray = TripsService.getPhotos();
+  uid = TripsService.getUID()
+
+  $scope.photos = photoArray;
+  $scope.$state = $state;
+  $scope.tripId = $stateParams.tripId;
+
+  //filtro delle foto per trip
+  $scope.thisTrip = function(photo){
+    return (photo.tripId == $stateParams.tripId);
+  };
+
+  $scope.upload = function() {
+      if (Camera) {
+        var options = {
+            quality : 50, //qualità immagine ridotta per testing
+            //destinationType : Camera.DestinationType.DATA_URL,
+            destinationType : Camera.DestinationType.FILE_URI,
+            sourceType : Camera.PictureSourceType.CAMERA,
+            encodingType: Camera.EncodingType.JPEG,
+            //saveToPhotoAlbum: true --> funziona solo se FILE_URI
+        };
+        $cordovaCamera.getPicture(options).then(function(imageData) {
+
+            //aggiungo l'immagine online
+            // $scope.photos.$add({
+            //   url:    imageData,
+            //   picBy:  uid,
+            //   tripId: $stateParams.tripId,
+            // }).then(function() {
+            //     console.log("Image has been uploaded to firebase");
+            // });
+            //
+            file = imageData.substr(imageData.lastIndexOf('/') + 1);
+            path = imageData.substr(0,imageData.lastIndexOf('/')+1);
+
+            //aggiungo l'immagine alla cartella dell'App
+            $cordovaFile.moveFile(path, file, cordova.file.externalApplicationStorageDirectory) //il 4° parametro è il nome del file
+              .then(function (success) {
+                // success
+                console.log("Image moved to app folder. ", success);
+              }, function (error) {
+                // error
+                console.error(error);
+              });
+        }, function(error) {
+            console.error(error);
+        });
+      } else {
+        console.log("Camera not supported");
+      }
+
+    }
 
 })
 
-.controller('MapCtrl', function($scope, $ionicLoading, $compile, $stateParams, TripsService) {
+.controller('MapCtrl', function($scope, $ionicLoading, $compile, $stateParams, $state, TripsService) {
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio delle foto
   //    - mappa
+  $scope.$state = $state;
+  $scope.tripId = $stateParams.tripId;
 
 })
 
-.controller('PhotosCtrl', function($scope, TripsService) {
+.controller('PhotosCtrl', function($scope, $state, $stateParams, TripsService) {
   //mi servono:
   // trips per utente
   // dettaglio foto
+  $scope.$state = $state;
+  $scope.tripId = $stateParams.tripId;
+
 
 
 })
 
-.controller('CameraCtrl', function($scope, Camera, tripRef, $stateParams, TripsService) {
-
-  $scope.getPhoto = function() {
-
-    if (navigator.camera) {
-
-      options = {
-        quality: 50,
-        destinationType: navigator.camera.DestinationType.FILE_URI,
-        saveToPhotAlbum: true,
-        // sourceType : Camera.PictureSourceType.CAMERA,
-        // allowEdit : true,
-        // encodingType: Camera.EncodingType.JPEG,
-        // targetWidth: 100,
-        // targetHeight: 100,
-        // popoverOptions: CameraPopoverOptions,
-      }
-
-      Camera.getPicture(options).then(function(imageData) {
-        console.log(imageData);
-        $scope.src = imageData;
-
-      }, function(err) {
-        console.err(err);
-      });
-    }else {
-      console.log("Camera is not defined");
-    }
-
-
-  };
-
-
-
+.controller('CameraCtrl', function($scope, $state, $stateParams, TripsService) {
+  $scope.$state = $state;
+  $scope.tripId = $stateParams.tripId;
 });

@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js --> spostato sul services.js
-angular.module('starter', ['ionic', 'starter.controllers', 'ngOpenFB', 'ui.select', 'ngSanitize', 'ngMessages'])
+angular.module('starter', ['ionic', 'ngCordova', 'starter.controllers', 'ngOpenFB', 'ui.select', 'ngSanitize', 'ngMessages'])
 
 .run(function($ionicPlatform, ngFB) {
   $ionicPlatform.ready(function() {
@@ -94,28 +94,43 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngOpenFB', 'ui.selec
     url: '/trips/:tripId/album',
     views: {
       'menuContent': {
-        templateUrl: 'templates/album.html',
+        templateUrl: 'templates/photos.html',
         controller: 'AlbumCtrl',
+        resolve: {
+          tripRef: function($stateParams, TripsService) {
+            return TripsService.getTripRef($stateParams.tripId)
+          }
+        }
       }
     }
   })
 
-  .state('app.trips/:tripId/albumChessboard', {
+  .state('app.trips/:tripId/albumStory', {
     url: '/trips/:tripId/albumChessboard',
     views: {
       'menuContent': {
         templateUrl: 'templates/photos.html',
         controller: 'AlbumChessboardCtrl',
+        resolve: {
+          tripRef: function($stateParams, TripsService) {
+            return TripsService.getTripRef($stateParams.tripId)
+          }
+        }
       }
     }
   })
 
-  .state('app.map/:tripId', {
+  .state('app.trips/:tripId/map', {
     url: '/trips/:tripId/map',
     views: {
       'menuContent': {
         templateUrl: 'templates/map.html',
         controller: 'MapCtrl',
+        resolve: {
+          tripRef: function($stateParams, TripsService) {
+            return TripsService.getTripRef($stateParams.tripId)
+          }
+        }
       }
     }
   })

@@ -11,6 +11,7 @@ module.service('TripsService', function($firebaseArray, $firebaseAuth){
   var profilePic = null;
   var trips = $firebaseArray(rootRef.child("trips"));
   var users = $firebaseArray(rootRef.child("users"));
+  var photos = $firebaseArray(rootRef.child("photos"));
 
   return {
     setUID: function (id) {
@@ -40,6 +41,9 @@ module.service('TripsService', function($firebaseArray, $firebaseAuth){
     getUsers: function () {
       return users;
     },
+    getPhotos: function () {
+      return photos;
+    },
     getTripRef: function(tripId) {
       return rootRef.child("trips").child(tripId);
     },
@@ -49,21 +53,3 @@ module.service('TripsService', function($firebaseArray, $firebaseAuth){
   };
 
 });
-
-module.factory('Camera', ['$q', function($q) {
-
-  return {
-    getPicture: function(options) {
-      var q = $q.defer();
-
-      navigator.camera.getPicture(function(result) {
-        // Do any magic you need
-        q.resolve(result);
-      }, function(err) {
-        q.reject(err);
-      }, options);
-
-      return q.promise;
-    }
-  }
-}]);
