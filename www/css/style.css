@@ -3,7 +3,7 @@
 
 /* Elimina i bordi */
 .no-border{
-  border-width: 0px;
+  border-width: 0px !important;
 }
 
 .no-padding{

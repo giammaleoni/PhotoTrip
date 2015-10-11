@@ -41,4 +41,16 @@
       </ion-item>
     </ion-list>
   </ion-content>
+
+  <!-- ngif current trip -->
+  <!-- state.go app.trips/{{currentTrip}} -->
+  <!-- currentTrip looppa sui trip e trova quello corrente (il primo) -->
+  <div class="tabs-striped tabs-bottom tabs-background-positive tabs-color-light">
+    <div class="tabs tabs-icon-left">
+      <a class="tab-item active no-border" ng-href="#/app/trips">
+        <i class="icon ion-camera"></i>
+        Take a photo for the trip: {{currentTrip}}
+      </a>
+    </div>
+  </div>
 </ion-view>
