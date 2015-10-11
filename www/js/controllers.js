@@ -624,27 +624,78 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
         };
         $cordovaCamera.getPicture(options).then(function(imageData) {
 
-            //aggiungo l'immagine online
-            // $scope.photos.$add({
-            //   url:    imageData,
-            //   picBy:  uid,
-            //   tripId: $stateParams.tripId,
-            // }).then(function() {
-            //     console.log("Image has been uploaded to firebase");
-            // });
-            //
-            file = imageData.substr(imageData.lastIndexOf('/') + 1);
-            path = imageData.substr(0,imageData.lastIndexOf('/')+1);
+            moveFile = function(imageData) {
+              file = imageData.substr(imageData.lastIndexOf('/') + 1);
+              path = imageData.substr(0,imageData.lastIndexOf('/')+1);
+              newPath = cordova.file.externalRootDirectory + "PhotoTrip";
 
-            //aggiungo l'immagine alla cartella dell'App
-            $cordovaFile.moveFile(path, file, cordova.file.externalApplicationStorageDirectory) //il 4° parametro è il nome del file
+              //leggo l'url
+              $cordovaFile.readAsDataURL(path, file)
+                .then(function (success) {
+                  // success
+                  // ho l'url completo, aggiungo l'immagine online
+                  $scope.photos.$add({
+                    url:    success,
+                    picBy:  uid,
+                    tripId: $stateParams.tripId,
+                  }).then(function() {
+                      console.log("Image has been uploaded to firebase");
+                  });
+
+                //console.log(success);
+
+                }, function (error) {
+                  // error
+                  console.error(error);
+                });
+
+              //aggiungo l'immagine alla cartella dell'App
+              $cordovaFile.moveFile(path, file, newPath) //il 4° parametro è il nome del file
+                .then(function (success) {
+                  // success
+                  console.log("Image moved to app folder. ", success);
+
+                  //se android aggiorno la galleria
+                  // if (cordova.platformId === "android") {
+                  //   mediaRefresh.scanMedia(newPath,
+                  //     function(result) {
+                  //       console.log(result);
+                  //     },
+                  //     function(error) {
+                  //       console.log("Media Refresh failed:" + error);
+                  //     });
+                  // }
+                  return success;
+                }, function (error) {
+                  // error
+                  console.error(error);
+                  return error;
+                });
+            }
+
+            // check esistenza directory + spostamento file
+            $cordovaFile.checkDir(cordova.file.externalRootDirectory, "PhotoTrip")
               .then(function (success) {
                 // success
-                console.log("Image moved to app folder. ", success);
+                //cartella esistente --> move
+                console.log("Directory already existing");
+                moveFile(imageData);
               }, function (error) {
                 // error
-                console.error(error);
+                //create folder
+                $cordovaFile.createDir(cordova.file.externalRootDirectory, "PhotoTrip", false)
+                  .then(function (success) {
+                    // success
+                    // directory creata
+                    console.log("Created directory");
+                    moveFile(imageData);
+                  }, function (error) {
+                    // error
+                    console.error("Impossible to create the directory");
+                  });
               });
+
+
         }, function(error) {
             console.error(error);
         });

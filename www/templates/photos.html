@@ -16,7 +16,7 @@
 
       <div collection-repeat="photo in photos | filter:thisTrip" class="col col-25 no-padding">
         <a ng-href="#/app">
-          <div class="chess-board" style="background-image:url(data:image/jpeg;base64,{{photo.url}});"></div>
+          <div class="chess-board" style="background-image:url({{photo.url}});"></div>
         </a>
       </div>
 
