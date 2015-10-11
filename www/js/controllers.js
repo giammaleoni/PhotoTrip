@@ -334,6 +334,23 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
     //si può inserire la scelta del tipo di condivisione
     //vedi "action sheet" ionic
   }
+
+  //get Current Trip
+
+  $scope.$watch( function() { return $scope.trips;}, function(trips) {
+if (trips){
+    today = new Date();
+    for (var i = 0; i < trips.length; i++) {
+      if (trips[i].from <= today &&  today <= trips[i].to) {
+        $scope.currentTrip = trips[i];
+        break;
+      }
+    }
+    }
+  })
+
+
+
 })
 
 .controller('TripCtrl', function($scope, tripRef, $stateParams, $state, $timeout, $http, TripsService) {
