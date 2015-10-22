@@ -613,7 +613,7 @@ if (trips){
 
 })
 
-.controller('AlbumCtrl', function($scope, $stateParams, $state, TripsService, $cordovaCamera, $cordovaFile){
+.controller('AlbumCtrl', function($scope, $stateParams, $state, tripRef, TripsService, $cordovaCamera, $cordovaFile){
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio delle foto
@@ -623,6 +623,11 @@ if (trips){
   $scope.photos = photoArray;
   $scope.$state = $state;
   $scope.tripId = $stateParams.tripId;
+
+  tripRef.once("value", function(snap) {
+    $scope.trip = snap.val();
+    //console.log($scope.trip);
+  });
 
   //filtro delle foto per trip
   $scope.thisTrip = function(photo){
@@ -722,15 +727,30 @@ if (trips){
 
     }
 
+    $scope.details = function(photo){
+      console.log(photo);
+      var image = new Image();
+      image.src = photo.url;
+      image.onload = function() {
+          EXIF.getData(image, function() {
+              console.log(EXIF.pretty(image));
+          });
+      };
+    }
 })
 
-.controller('MapCtrl', function($scope, $ionicLoading, $compile, $stateParams, $state, TripsService) {
+.controller('MapCtrl', function($scope, $ionicLoading, $compile, $stateParams, $state, TripsService, tripRef) {
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio delle foto
   //    - mappa
   $scope.$state = $state;
   $scope.tripId = $stateParams.tripId;
+
+  tripRef.once("value", function(snap) {
+    $scope.trip = snap.val();
+    //console.log($scope.trip);
+  });
 
 })
 
