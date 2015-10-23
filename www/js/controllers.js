@@ -634,6 +634,52 @@ if (trips){
     return (photo.tripId == $stateParams.tripId);
   };
 
+  //GPS: Degrees --> Decimal Converter
+  ConvertDMSToDD = function(degrees, minutes, seconds, direction) {
+    if (degrees && minutes && seconds && direction) {
+      var dd = degrees + minutes/60 + seconds/(60*60);
+
+      if (direction == "S" || direction == "W") {
+          dd = dd * -1;
+      } // Don't do anything for N or E
+      return dd;
+    } else {
+      console.log("GPS data missing");
+      return false;
+    }
+  }
+
+  //GPS get Photo EXIF data
+  getGPS = function(photo){
+    var GPSDetails = [];
+    var LatLng;
+    //console.log(photo);
+    var image = new Image();
+    image.src = photo.url;
+    image.onload = function() {
+        EXIF.getData(image, function() {
+            //console.log(EXIF.pretty(image));
+            GPSDetails.push(EXIF.getTag(image,"GPSLatitude"));
+            GPSDetails.push(EXIF.getTag(image,"GPSLatitudeRef"));
+            GPSDetails.push(EXIF.getTag(image,"GPSLongitude"));
+            GPSDetails.push(EXIF.getTag(image,"GPSLongitudeRef"));
+            //console.log(GPSDetails);
+
+            if (GPSDetails[0] && GPSDetails[1] && GPSDetails[2] && GPSDetails[3]) {
+              var lat = ConvertDMSToDD(GPSDetails[0][0].valueOf(), GPSDetails[0][1].valueOf(), GPSDetails[0][2].valueOf(), GPSDetails[1]);
+              var lon = ConvertDMSToDD(GPSDetails[2][0].valueOf(), GPSDetails[2][1].valueOf(), GPSDetails[2][2].valueOf(), GPSDetails[3]);
+              LatLng = [lat, lon];
+              console.log(LatLng);
+              //return LatLng;
+            }else {
+              console.log("GPS data missing for this photo");
+            }
+
+        });
+    };
+
+  }
+
   $scope.upload = function() {
       if (Camera) {
         var options = {
@@ -700,7 +746,7 @@ if (trips){
               .then(function (success) {
                 // success
                 //cartella esistente --> move
-                console.log("Directory already existing");
+                console.warn("Directory already existing");
                 moveFile(imageData);
               }, function (error) {
                 // error
@@ -728,15 +774,9 @@ if (trips){
     }
 
     $scope.details = function(photo){
-      console.log(photo);
-      var image = new Image();
-      image.src = photo.url;
-      image.onload = function() {
-          EXIF.getData(image, function() {
-              console.log(EXIF.pretty(image));
-          });
-      };
+      getGPS(photo);
     }
+
 })
 
 .controller('MapCtrl', function($scope, $ionicLoading, $compile, $stateParams, $state, TripsService, tripRef) {
