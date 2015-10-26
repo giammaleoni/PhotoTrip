@@ -214,6 +214,7 @@ module.controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicPopup
         // $scope.user = null;
         // TripsService.setUser($scope.user);
         // console.log("User logged out");
+        $state.go('app.trips', {'navDirection':'backward'});
       }
   }
 
@@ -613,12 +614,14 @@ if (trips){
 
 })
 
-.controller('AlbumCtrl', function($scope, $stateParams, $state, tripRef, TripsService, $cordovaCamera, $cordovaFile){
+.controller('AlbumCtrl', function($scope, $stateParams, $state, tripRef, TripsService, $cordovaCamera, $cordovaFile, $ionicActionSheet){
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio delle foto
   photoArray = TripsService.getPhotos();
-  uid = TripsService.getUID()
+  $scope.$watch( function () { return TripsService.getUID(); }, function ( uid ) {
+    $scope.uid = uid;
+  });
 
   $scope.photos = photoArray;
   $scope.$state = $state;
@@ -704,7 +707,7 @@ if (trips){
                   // ho l'url completo, aggiungo l'immagine online
                   $scope.photos.$add({
                     url:    success,
-                    picBy:  uid,
+                    picBy:  $scope.uid,
                     tripId: $stateParams.tripId,
                   }).then(function() {
                       console.log("Image has been uploaded to firebase");
@@ -777,6 +780,55 @@ if (trips){
       getGPS(photo);
     }
 
+    //TODO: gestire il multiple select
+    $scope.onHold = function(photo){
+      console.log(photo);
+
+      if ($scope.uid === photo.picBy) {
+        $ionicActionSheet.show({
+          titleText: 'Possible Actions',
+          buttons: [
+            { text: '<i class="icon ion-share"></i> Share' },
+            //{ text: '<i class="icon ion-arrow-move"></i> Move' },
+          ],
+          destructiveText: 'Delete',
+          cancelText: 'Cancel',
+          cancel: function() {
+            console.log('CANCELLED');
+          },
+          buttonClicked: function(index) {
+            console.log('BUTTON CLICKED', index);
+            return true;
+          },
+          destructiveButtonClicked: function() {
+            console.log('DESTRUCT');
+            return true;
+          }
+        });
+      }else {
+        $ionicActionSheet.show({
+            titleText: 'Possible Actions',
+            buttons: [
+              { text: '<i class="icon ion-share"></i> Share' },
+              //{ text: '<i class="icon ion-arrow-move"></i> Move' },
+            ],
+            cancelText: 'Cancel',
+            cancel: function() {
+              console.log('CANCELLED');
+            },
+            buttonClicked: function(index) {
+              console.log('BUTTON CLICKED', index);
+              return true;
+            },
+            destructiveButtonClicked: function() {
+              console.log('DESTRUCT');
+              return true;
+            }
+        });
+      }
+    }
+
+
 })
 
 .controller('MapCtrl', function($scope, $ionicLoading, $compile, $stateParams, $state, TripsService, tripRef) {
@@ -787,10 +839,67 @@ if (trips){
   $scope.$state = $state;
   $scope.tripId = $stateParams.tripId;
 
+  //da usare in questo modo:
+  // var filtered = phoroArray.filter(thisTrip)
+  thisTrip = function(photo){
+    return (photo.tripId == $stateParams.tripId);
+  };
+
+  $scope.$watch( function () { return TripsService.getPhotos(); }, function ( photoArray ) {
+    var filtered = photoArray.filter(thisTrip);
+  });
+
+
   tripRef.once("value", function(snap) {
     $scope.trip = snap.val();
     //console.log($scope.trip);
   });
+
+  $scope.centerOnMe = function() {
+    if(!$scope.map) {
+      return;
+    }
+
+    $scope.loading = $ionicLoading.show({
+      //content: 'Getting current location...',
+      //showBackdrop: false
+      template: '<ion-spinner icon="lines"></ion-spinner><br>Getting current location...',
+      noBackdrop: true,
+    });
+
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      $scope.map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+      //$scope.loading.hide(); --> deprecato
+      $ionicLoading.hide()
+    }, function(error) {
+      alert('Unable to get location: ' + error.message);
+    });
+  };
+
+  function initialize() {
+    var myLatlng = new google.maps.LatLng(0,0);
+
+    var mapOptions = {
+      center: myLatlng,
+      zoom: 15,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    var map = new google.maps.Map(document.getElementById('map'),mapOptions);
+
+
+    //Marker + infowindow + angularjs compiled ng-click
+    var infowindow = new google.maps.InfoWindow();
+    var contentString;
+    var compiled;
+
+    $scope.map = map;
+
+    $scope.centerOnMe();
+
+  }
+
+  //inizializza la mappa quando entri nella pagina
+  initialize();
 
 })
 

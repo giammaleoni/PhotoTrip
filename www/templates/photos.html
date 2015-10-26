@@ -16,7 +16,7 @@
 
       <div collection-repeat="photo in photos | filter:thisTrip" class="col col-25 no-padding">
         <!-- <a ng-href="#/app"> -->
-        <a ng-click=details(photo)>
+        <a ng-click=details(photo) on-hold=onHold(photo)>
           <div class="chess-board" style="background-image:url({{photo.url}});"></div>
         </a>
       </div>
