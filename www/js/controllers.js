@@ -831,7 +831,7 @@ if (trips){
 
 })
 
-.controller('MapCtrl', function($scope, $ionicLoading, $compile, $stateParams, $state, TripsService, tripRef) {
+.controller('MapCtrl', function($scope, $ionicLoading, $compile, $stateParams, $state, TripsService, tripRef, $cordovaGeolocation) {
   // mi serve:
   //    - dettaglio del trip
   //    - dettaglio delle foto
@@ -917,24 +917,55 @@ if (trips){
       return;
     }
 
+    // $scope.loading = $ionicLoading.show({
+    //   //content: 'Getting current location...',
+    //   //showBackdrop: false
+    //   template: '<ion-spinner icon="lines"></ion-spinner><br>Getting current location...',
+    //   noBackdrop: true,
+    // });
+
+
+    // function successCallback(pos) {
+    //   $scope.map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+    //   //$scope.loading.hide(); --> deprecato
+    //   $ionicLoading.hide()
+    // }
+    //
+    // function errorCallback(error) {
+    //   $ionicLoading.hide()
+    //   console.error('Unable to get location: ' + error.message);
+    // }
+    //
+    // var options = {
+  	// 		//frequency: 5000,
+  	// 		maximumAge: 10,				//il sistema accetta posizioni non più vecchie di 10 millisecondi
+  	// 		timeout: 5000,				//timeout error dopo 10 sec
+  	// 		enableHighAccuracy: true,	//posizione accurata
+  	// 	};
+    //navigator.geolocation.getCurrentPosition(successCallback,errorCallback,options);
+    var posOptions = {timeout: 10000, enableHighAccuracy: false};
+
+    $cordovaGeolocation
+      .getCurrentPosition(posOptions)
+      .then(function (position) {
+        $scope.loading = $ionicLoading.hide();
+        $scope.map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+      }, function(err) {
+        // error
+        $scope.loading = $ionicLoading.hide();
+        console.error(err);
+      });
+  }
+
+  function initialize() {
+    // var myLatlng = new google.maps.LatLng(0,0);
+
     $scope.loading = $ionicLoading.show({
-      //content: 'Getting current location...',
-      //showBackdrop: false
-      template: '<ion-spinner icon="lines"></ion-spinner><br>Getting current location...',
+      template: '<ion-spinner icon="spiral"></ion-spinner><br>Getting current location...',
       noBackdrop: true,
     });
 
-    navigator.geolocation.getCurrentPosition(function(pos) {
-      $scope.map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
-      //$scope.loading.hide(); --> deprecato
-      $ionicLoading.hide()
-    }, function(error) {
-      alert('Unable to get location: ' + error.message);
-    });
-  };
-
-  function initialize() {
-    var myLatlng = new google.maps.LatLng(0,0);
+    var myLatlng = new google.maps.LatLng(44.500901, 11.345461);
 
     var mapOptions = {
       center: myLatlng,
@@ -953,7 +984,7 @@ if (trips){
 
     $scope.centerOnMe();
 
-  }
+  };
 
   //inizializza la mappa quando entri nella pagina
   initialize();
