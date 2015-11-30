@@ -7,14 +7,32 @@
   </style>
 
   <ion-content class="has-header has-footer" scroll=false>
-    <div class="" style="display:none" ng-repeat="photo in photos">{{photo.$id}}</div>
 
-    <div id="map" data-tap-disabled="true" style="width:100%;height:100%;"}></div>
+    <div id="map" data-tap-disabled="true" style="width:100%;height:100%;"}>
+
+      <marker  ng-repeat="photo in photos"
+          name="A" text="B"
+          clickable="true"
+          on-click="showInfoWindow('myInfoWindow')"
+          id="{{photo.id}}"
+          position="[44.500901, 11.345461]"
+          draggable="false"
+      </marker>
+
+      <info-window id="myInfoWindow">
+        <div ng-non-bindable="">
+            <h1>{{this.tripId}}</h1>
+            <p>{{this.pickBy}}</p>
+            <img ng-src="photo.url" alt="" />
+        </div>
+      </info-window>
+
+    </div>
   </ion-content>
   <!-- <ion-footer-bar class="bar-dark">
       <a ng-click="centerOnMe()" class="button button-icon icon ion-navigate">Find Me</a>
     </ion-footer-bar> -->
 
-    <div ng-include src="'templates/tab-bar.html'"></div>
+  <div ng-include src="'templates/tab-bar.html'"></div>
 
 </ion-view>

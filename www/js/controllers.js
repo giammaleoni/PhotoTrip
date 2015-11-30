@@ -673,6 +673,7 @@ if (trips){
               var lon = ConvertDMSToDD(GPSDetails[2][0].valueOf(), GPSDetails[2][1].valueOf(), GPSDetails[2][2].valueOf(), GPSDetails[3]);
               LatLng = [lat, lon];
               console.log(LatLng);
+              alert("Photo details:\n\n" + photo.$id + "\n" + photo.picBy + "\n" + photo.tripId + "\n" +  LatLng);
               //return LatLng;
             }else {
               console.log("GPS data missing for this photo");
